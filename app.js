@@ -131,11 +131,12 @@ async function inspectFile(file) {
 
 function showError(message) { $("error").textContent=message; $("error").hidden=false; }
 function clearError() { $("error").hidden=true; $("error").textContent=""; }
+function clearComplete() { $("complete").hidden=true; }
 function acceptFile(file) {
   if(!file)return;
   const suffix=file.name.split(".").pop()?.toLowerCase();
   if(!["mp4","mxf"].includes(suffix)){showError("Choose an MP4 or MXF file.");return;}
-  selectedFile=file; clearError();
+  selectedFile=file; clearError(); clearComplete();
   $("file-name").textContent=file.name;
   $("file-meta").textContent=`${(file.size/1024/1024).toFixed(2)} MB · ready to inspect locally`;
   $("choose-file").textContent="Replace file";
@@ -153,13 +154,13 @@ $("drop-zone").addEventListener("drop",(event)=>{event.preventDefault();$("drop-
 $("validate").addEventListener("click",async()=>{
   if(!selectedFile){$("file-input").click();return;}
   clearError(); $("validate").disabled=true; $("progress").hidden=false;
-  try { const asset=await inspectFile(selectedFile); selectedProfile="iab-digital"; render(await buildResult(asset)); }
+  try { const asset=await inspectFile(selectedFile); selectedProfile="iab-digital"; render(await buildResult(asset)); $("complete").hidden=false; }
   catch(error){showError(error instanceof Error?error.message:"Validation failed.");}
   finally{$("validate").disabled=false;$("progress").hidden=true;}
 });
 
 async function loadFixture(id) {
-  selectedFile=null; selectedProfile="iab-digital"; clearError();
+  selectedFile=null; selectedProfile="iab-digital"; clearError(); clearComplete();
   $("file-input").value=""; $("file-name").textContent="Drop one master here"; $("file-meta").textContent="MP4 or MXF · processed in your browser"; $("choose-file").textContent="Choose file";
   document.querySelectorAll(".fixture").forEach((button)=>button.classList.toggle("active",button.dataset.fixture===id));
   render(await buildResult(demoAssets[id]));

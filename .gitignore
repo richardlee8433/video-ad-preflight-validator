@@ -4,3 +4,4 @@ desktop.ini
 *.tmp
 node_modules/
 .netlify/
+*.zip

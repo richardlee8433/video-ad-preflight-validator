@@ -4,6 +4,7 @@
 .validate-button strong { margin: 0 auto; font-size: 1rem; }
 .validate-button:disabled { cursor: wait; opacity: .72; }
 .local-progress { margin-top: 10px; padding: 10px 12px; border-left: 3px solid #315b70; background: #e8f0f1; color: #315b70; font: 650 .78rem/1.4 monospace; }
+.complete-banner { margin-top: 10px; padding: 10px 12px; border-left: 3px solid #207a5a; background: #e4f1eb; color: #164f3d; font-size: .82rem; line-height: 1.45; }
 .upload-icon { font-size: 2rem; font-weight: 300; }
 .fixture > span:first-child { color: #667078; }
 .fixture > span:last-child { font-size: 1.25rem; }
