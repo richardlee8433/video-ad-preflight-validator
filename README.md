@@ -72,15 +72,19 @@ File metadata can answer some questions and not others. The tool states its own 
 rather than implying broader coverage:
 
 - **Integrated loudness and true peak** require signal-level audio analysis. The rules exist
-  (Clearcast requires −23 LUFS ±1 and a true peak at or below −1 dBTP) but on a real uploaded
-  file these report `NOT EVALUATED` rather than guessing. The bundled demo assets carry loudness
-  values so the rules can be seen working, and those checks are marked **supplied, not measured**
-  in the interface — a value that looks measured but isn't is exactly the failure this kind of
-  tool exists to catch, so it should not introduce one of its own.
+  (Clearcast requires −23 LUFS ±1 and a true peak at or below −1 dBTP) but on an uploaded file
+  these report `NOT EVALUATED` rather than guessing.
 - **Rights clearance, brand safety and editorial approval** need evidence and human judgement.
   They are named in the interface as out of scope, not silently omitted.
 
 A validator that quietly skips what it cannot measure is worse than one that says so.
+
+Because of that, results state where their values came from. The demo assets are preset
+fixtures, not measurements, so their values are labelled **Preset fixture** and the boundary
+notice narrows to the three judgement-based checks — a fixture's loudness genuinely was
+evaluated, just not from a file. An upload is labelled **Detected**, and the boundary notice
+widens to include loudness and true peak. A value that looks measured but isn't is exactly the
+failure this kind of tool exists to catch, so it should not introduce one of its own.
 
 ## Running locally
 
