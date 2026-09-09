@@ -73,8 +73,10 @@ rather than implying broader coverage:
 
 - **Integrated loudness and true peak** require signal-level audio analysis. The rules exist
   (Clearcast requires −23 LUFS ±1 and a true peak at or below −1 dBTP) but on a real uploaded
-  file these report `NOT EVALUATED` rather than guessing. The bundled demo assets carry
-  loudness values so the rules can be seen working.
+  file these report `NOT EVALUATED` rather than guessing. The bundled demo assets carry loudness
+  values so the rules can be seen working, and those checks are marked **supplied, not measured**
+  in the interface — a value that looks measured but isn't is exactly the failure this kind of
+  tool exists to catch, so it should not introduce one of its own.
 - **Rights clearance, brand safety and editorial approval** need evidence and human judgement.
   They are named in the interface as out of scope, not silently omitted.
 

@@ -5,9 +5,9 @@ const RULE_FILES = [
 ];
 
 const demoAssets = {
-  digital: { filename:"city_digital.mp4",file_size:61300000,container:"mp4",video_codec:"h264",width:1920,height:1080,resolution:"1920x1080",aspect_ratio:1.7778,frame_rate:25,frame_rate_mode:"constant",scan_type:"progressive",video_bitrate:16000000,duration:30,audio_codec:"aac",audio_bitrate:192000,audio_sample_rate:48000,audio_channels:2,pixel_format:"yuv420p",colour_space:"bt709",operational_pattern:null,start_timecode:null,bits_per_sample:null,integrated_loudness:-23.2,true_peak:-2.1 },
-  audio: { filename:"city_amazon_audio_fail.mp4",file_size:61300000,container:"mp4",video_codec:"h264",width:1920,height:1080,resolution:"1920x1080",aspect_ratio:1.7778,frame_rate:25,frame_rate_mode:"constant",scan_type:"progressive",video_bitrate:16000000,duration:30,audio_codec:"aac",audio_bitrate:160000,audio_sample_rate:48000,audio_channels:2,pixel_format:"yuv420p",colour_space:"bt709",operational_pattern:null,start_timecode:null,bits_per_sample:null,integrated_loudness:-23.2,true_peak:-2.1 },
-  broadcast: { filename:"city_broadcast.mxf",file_size:302100000,container:"mxf",video_codec:"mpeg2video",width:1920,height:1080,resolution:"1920x1080",aspect_ratio:1.7778,frame_rate:25,frame_rate_mode:"constant",scan_type:"interlaced",video_bitrate:50000000,duration:45,audio_codec:"pcm_s24le",audio_bitrate:2304000,audio_sample_rate:48000,audio_channels:2,pixel_format:"yuv422p",colour_space:"bt709",operational_pattern:"op1a",start_timecode:"09:59:50:00",bits_per_sample:24,integrated_loudness:-23,true_peak:-2 },
+  digital: { filename:"city_digital.mp4",file_size:61300000,container:"mp4",video_codec:"h264",width:1920,height:1080,resolution:"1920x1080",aspect_ratio:1.7778,frame_rate:25,frame_rate_mode:"constant",scan_type:"progressive",video_bitrate:16000000,duration:30,audio_codec:"aac",audio_bitrate:192000,audio_sample_rate:48000,audio_channels:2,pixel_format:"yuv420p",colour_space:"bt709",operational_pattern:null,start_timecode:null,bits_per_sample:null,integrated_loudness:-23.2,true_peak:-2.1,supplied:["integrated_loudness","true_peak"] },
+  audio: { filename:"city_amazon_audio_fail.mp4",file_size:61300000,container:"mp4",video_codec:"h264",width:1920,height:1080,resolution:"1920x1080",aspect_ratio:1.7778,frame_rate:25,frame_rate_mode:"constant",scan_type:"progressive",video_bitrate:16000000,duration:30,audio_codec:"aac",audio_bitrate:160000,audio_sample_rate:48000,audio_channels:2,pixel_format:"yuv420p",colour_space:"bt709",operational_pattern:null,start_timecode:null,bits_per_sample:null,integrated_loudness:-23.2,true_peak:-2.1,supplied:["integrated_loudness","true_peak"] },
+  broadcast: { filename:"city_broadcast.mxf",file_size:302100000,container:"mxf",video_codec:"mpeg2video",width:1920,height:1080,resolution:"1920x1080",aspect_ratio:1.7778,frame_rate:25,frame_rate_mode:"constant",scan_type:"interlaced",video_bitrate:50000000,duration:45,audio_codec:"pcm_s24le",audio_bitrate:2304000,audio_sample_rate:48000,audio_channels:2,pixel_format:"yuv422p",colour_space:"bt709",operational_pattern:"op1a",start_timecode:"09:59:50:00",bits_per_sample:24,integrated_loudness:-23,true_peak:-2,supplied:["integrated_loudness","true_peak"] },
 };
 
 let selectedFile = null;
@@ -65,7 +65,8 @@ function validateProfile(profile, asset, activeDuration) {
       const passed = rule.operator === "duration_offset_in" ? Array.isArray(rule.value) && rule.value.includes(actual) : compare(actual, rule.operator, rule.value);
       outcome = passed ? "PASS" : "FAIL";
     }
-    return { attribute:rule.attribute,detected_value:actual,expected_value:rule.value,result:outcome,severity:rule.severity,rule_id:rule.id,source:rule.source,source_url:rule.source_url,version:rule.version,explanation:rule.explanation };
+    const supplied = outcome !== "NOT_EVALUATED" && (asset.supplied || []).includes(rule.attribute);
+    return { attribute:rule.attribute,detected_value:actual,expected_value:rule.value,result:outcome,provenance:outcome==="NOT_EVALUATED"?null:supplied?"supplied":"measured",severity:rule.severity,rule_id:rule.id,source:rule.source,source_url:rule.source_url,version:rule.version,explanation:rule.explanation };
   });
   const errors = checks.filter((check) => check.result === "FAIL" && check.severity === "error").length;
   const warnings = checks.filter((check) => check.result === "FAIL" && check.severity === "warning").length;
@@ -77,7 +78,7 @@ async function buildResult(asset) {
   const durationText = $("active-duration").value;
   const activeDuration = durationText ? Number(durationText) : null;
   const results = profiles.map((profile) => validateProfile(profile, asset, activeDuration));
-  return { asset, profiles:results, ready_count:results.filter((profile)=>profile.status!=="FAIL").length, profile_count:results.length, not_evaluated:["Integrated loudness and true peak require signal analysis","Rights clearance","Brand safety","Editorial approval"] };
+  return { asset, profiles:results, ready_count:results.filter((profile)=>profile.status!=="FAIL").length, profile_count:results.length, not_evaluated:["Integrated loudness and true peak require signal-level analysis, so uploaded files report them as not evaluated","Rights clearance","Brand safety","Editorial approval"] };
 }
 
 function render(result) {
@@ -96,7 +97,7 @@ function render(result) {
   $("check-list").innerHTML = profile.checks.map((check) => {
     const rowClass = check.result.toLowerCase().replace("_","-");
     const icon = check.result === "PASS" ? "✓" : check.result === "NOT_EVALUATED" ? "?" : check.severity === "warning" ? "△" : "×";
-    return `<article class="check-row check-${rowClass}"><div class="check-icon">${icon}</div><div class="check-copy"><div class="check-title"><h3>${escapeHtml(check.attribute.replaceAll("_"," "))}</h3><span>${escapeHtml(check.result.replaceAll("_"," "))}</span></div><p>${escapeHtml(check.explanation)}</p><div class="values"><span>Detected <strong>${escapeHtml(humanValue(check.attribute,check.detected_value))}</strong></span><span>Expected <strong>${escapeHtml(humanValue(check.attribute,check.expected_value))}</strong></span></div><a href="${escapeHtml(check.source_url)}" target="_blank" rel="noreferrer">${escapeHtml(check.source)} · ${escapeHtml(check.version)}</a></div></article>`;
+    return `<article class="check-row check-${rowClass}"><div class="check-icon">${icon}</div><div class="check-copy"><div class="check-title"><h3>${escapeHtml(check.attribute.replaceAll("_"," "))}</h3><span>${escapeHtml(check.result.replaceAll("_"," "))}</span>${check.provenance==="supplied"?`<span class="supplied-flag" title="This value was supplied with the demo asset, not measured from the file.">supplied, not measured</span>`:""}</div><p>${escapeHtml(check.explanation)}</p><div class="values"><span>Detected <strong>${escapeHtml(humanValue(check.attribute,check.detected_value))}</strong></span><span>Expected <strong>${escapeHtml(humanValue(check.attribute,check.expected_value))}</strong></span></div><a href="${escapeHtml(check.source_url)}" target="_blank" rel="noreferrer">${escapeHtml(check.source)} · ${escapeHtml(check.version)}</a></div></article>`;
   }).join("");
   $("not-evaluated").innerHTML = result.not_evaluated.map((item) => `<li><span aria-hidden="true">?</span>${escapeHtml(item)}</li>`).join("");
 }

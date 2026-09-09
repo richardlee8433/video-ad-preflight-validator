@@ -5,6 +5,7 @@
 .validate-button:disabled { cursor: wait; opacity: .72; }
 .local-progress { margin-top: 10px; padding: 10px 12px; border-left: 3px solid #315b70; background: #e8f0f1; color: #315b70; font: 650 .78rem/1.4 monospace; }
 .complete-banner { margin-top: 10px; padding: 10px 12px; border-left: 3px solid #207a5a; background: #e4f1eb; color: #164f3d; font-size: .82rem; line-height: 1.45; }
+.check-title .supplied-flag { margin-left: 8px; padding: 2px 7px; border: 1px solid #b5893f; border-radius: 3px; background: #fdf3e2; color: #855f1c; font-size: .66rem; font-weight: 650; letter-spacing: .03em; text-transform: uppercase; white-space: nowrap; }
 .upload-icon { font-size: 2rem; font-weight: 300; }
 .fixture > span:first-child { color: #667078; }
 .fixture > span:last-child { font-size: 1.25rem; }
