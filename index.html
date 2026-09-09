@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Destination-specific video ad technical pre-flight validation.">
+  <title>Same Ad, Different Truths</title>
+  <link rel="icon" href="/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/static-overrides.css">
+  <script defer src="https://unpkg.com/mediainfo.js@0.3.7"></script>
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <main>
+    <header class="site-header">
+      <div class="brand-mark">SAT</div>
+      <div><p class="eyebrow">Video ad pre-flight validator</p><h1>Same ad, different truths</h1></div>
+      <div class="version-pill">Ruleset 2026.09</div>
+    </header>
+
+    <section class="workspace" aria-label="Video validation workspace">
+      <div class="upload-column">
+        <div id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="Choose or drop an MP4 or MXF file">
+          <input id="file-input" type="file" accept="video/mp4,.mp4,.mxf" hidden>
+          <div class="upload-icon" aria-hidden="true">↑</div>
+          <div><h2 id="file-name">Drop one master here</h2><p id="file-meta">MP4 or MXF · processed in your browser</p></div>
+          <button id="choose-file" class="outline-button" type="button">Choose file</button>
+        </div>
+
+        <label class="duration-field">
+          <span>Active creative duration</span>
+          <span class="duration-control"><input id="active-duration" type="number" min="1" max="600" step="0.001" value="30"><span>sec</span></span>
+          <small>Used only for delivery packaging checks.</small>
+        </label>
+
+        <button id="validate" class="validate-button" type="button"><span aria-hidden="true">›</span><strong>Validate against 3 profiles</strong></button>
+        <div id="progress" class="local-progress" hidden>Inspecting media locally…</div>
+        <p id="error" class="error-banner" role="alert" hidden></p>
+
+        <div class="fixture-section">
+          <div class="section-heading"><span>Deterministic demo assets</span><button id="reset" type="button">↻ Reset</button></div>
+          <div class="fixture-list">
+            <button class="fixture active" type="button" data-fixture="digital"><span aria-hidden="true">▣</span><span><strong>Digital baseline</strong><small>192 kbps AAC · 30 sec</small></span><span>›</span></button>
+            <button class="fixture" type="button" data-fixture="audio"><span aria-hidden="true">▣</span><span><strong>Small-rule failure</strong><small>160 kbps AAC · 30 sec</small></span><span>›</span></button>
+            <button class="fixture" type="button" data-fixture="broadcast"><span aria-hidden="true">▣</span><span><strong>Broadcast delivery</strong><small>XDCAM 50 · 45 sec</small></span><span>›</span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="results-column">
+        <div class="summary-line"><div><p class="eyebrow">Delivery readiness</p><h2><span id="ready-count">—</span> / 3 destinations ready</h2></div><p id="asset-name">Loading rules…</p></div>
+        <div id="profile-grid" class="profile-grid" role="tablist" aria-label="Validation profiles"></div>
+        <div id="metadata-strip" class="metadata-strip"></div>
+        <section class="detail-panel" aria-live="polite">
+          <div class="detail-heading"><div><p class="eyebrow">Selected destination</p><h2 id="detail-name">—</h2></div><span id="detail-status" class="large-status">—</span></div>
+          <div id="check-list" class="check-list"></div>
+        </section>
+      </div>
+    </section>
+
+    <section class="boundary-section">
+      <div><p class="eyebrow">Product boundary</p><h2>Not evaluated</h2><p>These checks need evidence, judgement, or signal-level audio analysis beyond file metadata.</p></div>
+      <ul id="not-evaluated"></ul>
+    </section>
+  </main>
+</body>
+</html>

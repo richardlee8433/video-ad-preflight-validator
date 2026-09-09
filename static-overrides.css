@@ -1,0 +1,13 @@
+.outline-button { min-height: 40px; padding: 8px 16px; border: 1px solid #a9a69d; background: transparent; color: #11151a; }
+.validate-button { display: flex; align-items: center; gap: 12px; padding: 0 20px; border: 0; color: #fffdf5; }
+.validate-button span { font-size: 2rem; font-weight: 300; }
+.validate-button strong { margin: 0 auto; font-size: 1rem; }
+.validate-button:disabled { cursor: wait; opacity: .72; }
+.local-progress { margin-top: 10px; padding: 10px 12px; border-left: 3px solid #315b70; background: #e8f0f1; color: #315b70; font: 650 .78rem/1.4 monospace; }
+.upload-icon { font-size: 2rem; font-weight: 300; }
+.fixture > span:first-child { color: #667078; }
+.fixture > span:last-child { font-size: 1.25rem; }
+.profile-card { cursor: pointer; }
+.profile-card:focus-visible, .fixture:focus-visible, .validate-button:focus-visible, .outline-button:focus-visible, .drop-zone:focus-visible { outline: 3px solid #315b70; outline-offset: 3px; }
+.check-icon { font-weight: 800; }
+.privacy-note { color: #687076; }
