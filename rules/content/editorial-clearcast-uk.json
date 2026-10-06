@@ -1,0 +1,72 @@
+{
+  "profile": "clearcast-uk",
+  "layer": "editorial",
+  "rules": [
+    {
+      "id": "clearcast-disclaimer-present",
+      "layer": "editorial",
+      "operator": "present",
+      "params": {
+        "type": "disclaimer",
+        "text_contains": "responsibly"
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "Alcohol advertising must carry the responsible-drinking line."
+    },
+    {
+      "id": "clearcast-disclaimer-hold",
+      "layer": "editorial",
+      "operator": "min_on_screen",
+      "params": {
+        "type": "disclaimer",
+        "text_contains": "responsibly",
+        "seconds": 3
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "Broadcast supers need a minimum hold time to be legible."
+    },
+    {
+      "id": "clearcast-disclaimer-safe",
+      "layer": "editorial",
+      "operator": "inside_safe_area",
+      "params": {
+        "type": "disclaimer",
+        "text_contains": "responsibly",
+        "margin": 0.05
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "Text must sit inside the title-safe area (5% margin)."
+    },
+    {
+      "id": "clearcast-disclaimer-in-content",
+      "layer": "editorial",
+      "operator": "within_active_content",
+      "params": {
+        "type": "disclaimer",
+        "text_contains": "responsibly"
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "A disclaimer on the clock slate is not part of the ad. It has to appear after the slate and black, inside the commercial itself."
+    },
+    {
+      "id": "clearcast-claims-review",
+      "layer": "editorial",
+      "operator": "claims_review",
+      "params": {
+        "type": "claim"
+      },
+      "severity": "review",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "Superlative or comparative claims can be detected automatically, but whether they are substantiated is a human, evidence-based decision."
+    }
+  ]
+}

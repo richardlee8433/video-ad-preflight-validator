@@ -1,0 +1,32 @@
+{
+  "file": "ad_claim_no_logo.mp4",
+  "duration": 30,
+  "expected": {
+    "technical": "pass",
+    "brand": "fix: no end-card logo",
+    "editorial": "review: superlative claims need substantiation"
+  },
+  "objects": [
+    {
+      "type": "disclaimer",
+      "text": "Please enjoy Northlight responsibly. drinkaware.ie",
+      "start": 25,
+      "end": 30,
+      "bbox_y_bottom": 0.887
+    },
+    {
+      "type": "claim",
+      "text": "No.1 lager in Ireland",
+      "start": 10,
+      "end": 17,
+      "source": "on_screen"
+    },
+    {
+      "type": "claim",
+      "text": "the best lager in Ireland, guaranteed",
+      "start": 4,
+      "end": 8,
+      "source": "spoken"
+    }
+  ]
+}

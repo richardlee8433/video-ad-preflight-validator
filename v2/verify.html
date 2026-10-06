@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Preflight v2</title>
+  <link rel="icon" href="/v2/favicon.svg">
+  <link rel="stylesheet" href="/v2/verify.css">
+  <script defer src="https://unpkg.com/mediainfo.js@0.3.7"></script>
+  <script defer src="/v2/engine.js"></script>
+  <script defer src="/v2/verify.js"></script>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <p class="eyebrow">Video ad pre-flight · v2</p>
+      <h1>One file. Four layers. Every destination.</h1>
+      <p class="lede">File metadata and signal measurements check the technical layer. A model detects disclaimers, logos and claims with timecodes. The same rule engine judges both, and every verdict cites its rule.</p>
+    </div>
+    <span class="pill-outline">Ruleset 2026.10</span>
+  </header>
+
+  <section class="upload card">
+    <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose or drop a video file">
+      <input id="file" type="file" accept=".mp4,.mxf,video/mp4" hidden>
+      <div class="drop-icon">↑</div>
+      <div class="drop-copy"><strong id="file-name">Drop a video ad here</strong><span id="file-meta">MP4 or MXF</span></div>
+      <label class="active">Commercial length <input id="active" type="number" value="30" min="1" max="600"> s</label>
+      <button id="run" class="primary" type="button">Verify</button>
+    </div>
+    <div class="samples"><span>Test ads with known ground truth:</span><div id="fixtures"></div></div>
+    <ol id="steps" class="steps" hidden>
+      <li data-step="meta">Reading file metadata in the browser</li>
+      <li data-step="server">Measuring loudness and black, detecting content with the model</li>
+      <li data-step="rules">Applying destination, brand and editorial rules</li>
+    </ol>
+    <p id="error" class="error" hidden></p>
+  </section>
+
+  <section id="results" hidden>
+    <div class="card">
+      <div class="result-head">
+        <div>
+          <h2 id="asset-title">—</h2>
+          <p id="asset-sub" class="muted"></p>
+        </div>
+        <span id="origin" class="origin"></span>
+      </div>
+      <div id="timeline" class="timeline"></div>
+      <p id="content-basis" class="basis"></p>
+    </div>
+
+    <div class="card">
+      <table class="grid">
+        <thead><tr><th>Destination</th><th>Technical</th><th>Brand</th><th>Editorial</th><th>Rights</th><th>Status</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="detail"></div>
+
+    <div class="card boundary">
+      <h3>Product boundary: not decided here</h3>
+      <ul>
+        <li><b>Rights.</b> Usage windows, territories and talent terms are not in the video. They need the rights record held against the asset.</li>
+        <li><b>Claim substantiation.</b> The model can find a claim. Whether there is evidence for it is a person's decision.</li>
+        <li><b>Final editorial approval.</b> Detections are evidence for a reviewer, not a clearance.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+</body>
+</html>

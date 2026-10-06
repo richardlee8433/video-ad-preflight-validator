@@ -1,0 +1,30 @@
+{
+  "file": "ad_broadcast_slate.mp4",
+  "duration": 40,
+  "expected": {
+    "technical": "packaging offset 10s",
+    "brand": "pass",
+    "editorial": "fix: disclaimer only on slate, not in active content"
+  },
+  "content_start": 10,
+  "objects": [
+    {
+      "type": "slate",
+      "start": 0,
+      "end": 7
+    },
+    {
+      "type": "disclaimer",
+      "text": "Please enjoy Northlight responsibly. drinkaware.ie",
+      "start": 0,
+      "end": 7,
+      "note": "on slate"
+    },
+    {
+      "type": "logo",
+      "text": "NORTHLIGHT",
+      "start": 35,
+      "end": 40
+    }
+  ]
+}

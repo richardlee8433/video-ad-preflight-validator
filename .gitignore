@@ -5,3 +5,7 @@ desktop.ini
 node_modules/
 .netlify/
 *.zip
+.env
+cache/
+__pycache__/
+fixtures/*.mp4

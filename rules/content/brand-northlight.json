@@ -1,0 +1,49 @@
+{
+  "profile": "northlight-brand",
+  "name": "Northlight brand guidelines (fictional)",
+  "layer": "brand",
+  "note": "Applied the same way to every destination.",
+  "rules": [
+    {
+      "id": "brand-logo-present",
+      "layer": "brand",
+      "operator": "present",
+      "params": {
+        "type": "logo",
+        "text_contains": "northlight"
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "Every Northlight asset must show the wordmark."
+    },
+    {
+      "id": "brand-logo-end-card",
+      "layer": "brand",
+      "operator": "in_final_seconds",
+      "params": {
+        "type": "logo",
+        "text_contains": "northlight",
+        "seconds": 5
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "The wordmark must appear on the end card, in the last 5 seconds of the commercial."
+    },
+    {
+      "id": "brand-logo-hold",
+      "layer": "brand",
+      "operator": "min_on_screen",
+      "params": {
+        "type": "logo",
+        "text_contains": "northlight",
+        "seconds": 2
+      },
+      "severity": "warning",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "The wordmark should be held for at least 2 seconds."
+    }
+  ]
+}

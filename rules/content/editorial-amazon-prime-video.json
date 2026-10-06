@@ -1,0 +1,59 @@
+{
+  "profile": "amazon-prime-video",
+  "layer": "editorial",
+  "rules": [
+    {
+      "id": "amazon-disclaimer-present",
+      "layer": "editorial",
+      "operator": "present",
+      "params": {
+        "type": "disclaimer",
+        "text_contains": "responsibly"
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "Alcohol advertising must carry the responsible-drinking line."
+    },
+    {
+      "id": "amazon-disclaimer-hold",
+      "layer": "editorial",
+      "operator": "min_on_screen",
+      "params": {
+        "type": "disclaimer",
+        "text_contains": "responsibly",
+        "seconds": 3
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "On a TV screen viewed from a sofa, the disclaimer needs at least 3 seconds."
+    },
+    {
+      "id": "amazon-disclaimer-safe",
+      "layer": "editorial",
+      "operator": "inside_safe_area",
+      "params": {
+        "type": "disclaimer",
+        "text_contains": "responsibly",
+        "margin": 0.05
+      },
+      "severity": "error",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "Text must sit inside the title-safe area (5% margin), or some TVs will crop it."
+    },
+    {
+      "id": "amazon-claims-review",
+      "layer": "editorial",
+      "operator": "claims_review",
+      "params": {
+        "type": "claim"
+      },
+      "severity": "review",
+      "source": "Illustrative rule for this demo, not quoted from a published code",
+      "illustrative": true,
+      "explanation": "Superlative or comparative claims can be detected automatically, but whether they are substantiated is a human, evidence-based decision."
+    }
+  ]
+}
