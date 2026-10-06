@@ -111,3 +111,26 @@ several years old; a production system would need explicit specification version
 and a review process rather than hand-maintained JSON. The intent here is to demonstrate the
 shape of the problem and a workable engine design, not to be authoritative on any
 destination's current requirements.
+
+## v2: content checks (local server)
+
+`/v2/verify.html` adds brand and editorial checks on top of the v1 engine. It needs the local
+server, which measures loudness, true peak and black with ffmpeg and detects on-screen and
+spoken content with an OpenAI vision model plus a Whisper transcript.
+
+```bash
+pip install fastapi uvicorn python-multipart openai imageio-ffmpeg pillow
+echo 'OPENAI_API_KEY=...' > .env
+python3 tools/make_fixtures.py      # synthesise test ads with known ground truth
+python3 tools/eval_detection.py     # score detection against the ground truth
+python3 server.py                   # http://localhost:8787
+```
+
+Design: the model detects, the rules decide, a person judges. The model only reports what it
+sees and when; timing comes from the sampled frames, positions are measured from the pixels
+that change, and pass or fail comes from the same JSON rule engine as v1. Brand and editorial
+rules are illustrative, not quoted from a published code. Rights are out of scope: they are not
+in the video.
+
+On static hosting (Netlify) the v2 page still runs the metadata checks and says which checks
+need the server.

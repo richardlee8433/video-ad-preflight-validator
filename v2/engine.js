@@ -35,7 +35,8 @@
     }
     const slate = detections.find((d) => d.type === "slate");
     if (slate) {
-      const black = (signal?.black_segments || []).find((b) => b.start >= slate.end - 1 && b.start <= slate.end + 2);
+      // Frame sampling makes the slate's end approximate, so take black that starts inside or just after it.
+      const black = (signal?.black_segments || []).find((b) => b.start >= slate.start && b.start <= slate.end + 2);
       if (black) return { seconds: black.end, basis: `slate ${span(slate)} detected by model, then black ${span(black)} measured in the signal` };
       return { seconds: slate.end, basis: `slate ${span(slate)} detected by model` };
     }

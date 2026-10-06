@@ -3,13 +3,14 @@
 Technical metadata is still read in the browser (MediaInfo). This server adds
 what the browser cannot do:
   - signal:  integrated loudness, true peak and black segments, measured by ffmpeg
-  - content: disclaimers, logos, claims and slates with timecodes, detected by Gemini
+  - content: disclaimers, logos, claims and slates with timecodes, detected by an OpenAI vision model from sampled frames plus a Whisper transcript
 
 It never decides pass or fail. It returns measurements and detections; the rule
 engine in the browser applies the destination rules to them.
 
-Run: python3 server.py   (reads GEMINI_API_KEY from the environment or .env)
+Run: python3 server.py   (reads OPENAI_API_KEY from the environment or .env)
 """
+import base64
 import hashlib
 import json
 import os
@@ -28,8 +29,6 @@ from fastapi.staticfiles import StaticFiles
 ROOT = os.path.dirname(os.path.abspath(__file__))
 CACHE = os.path.join(ROOT, "cache")
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
-MODEL = "gemini-2.5-flash"
-SAMPLE_FPS = 4
 
 os.makedirs(CACHE, exist_ok=True)
 
@@ -72,45 +71,71 @@ def measure_signal(path):
 
 
 # ---------- content ----------
+# OpenAI vision models take images, not video. So: sample frames at a fixed rate with
+# their timestamps, transcribe the audio with timestamps, and ask the model to report
+# what it sees and hears. Timing comes from the sampled frames, not from the model.
 
-PROMPT = """You are checking a video advertisement before delivery. Report what is in the video.
-Do not judge whether anything is compliant. Only detect and time it precisely.
+MODEL = os.environ.get("OPENAI_VISION_MODEL", "gpt-4o")
+TRANSCRIBE_MODEL = "whisper-1"
+SAMPLE_FPS = 4
+MAX_FRAMES = 24
+# A frame counts as changed when enough pixels change sharply. Supers appearing are a small
+# area changing a lot; slow camera or background drift is a large area changing a little.
+PIXEL_DELTA = 30         # per-pixel greyscale change (0-255) that counts as sharp
+CHANGED_SHARE = 0.004    # share of a 160x90 thumbnail that must change sharply
+KEYFRAME_EVERY = 3.0     # also keep one frame every N seconds as a safety net
+# The rate limiter estimates tokens per image regardless of size, so the lever is how many
+# frames are sent. Supers and cards appear abruptly, so only frames where the picture
+# changes are sent; each one stands for the interval until the next sent frame.
+FRAME_SIZE = (910, 512)
+
+PROMPT = """You are checking a video advertisement before delivery. You get the frames where the
+picture changes, each labelled with its time and how long it stays unchanged, and a timestamped
+transcript of the audio.
+Report what is there. Do not judge whether anything is compliant.
 
 Report every item of these types:
 - "disclaimer": legal, responsibility, terms or safety text, on screen or spoken
 - "logo": a brand logo or wordmark shown as a graphic mark
-- "claim": a comparative, superlative, health or performance claim about the product
-  (e.g. "best", "No.1", "guaranteed"), on screen or spoken
+- "claim": ONLY a comparative, superlative, absolute, health or performance claim that would
+  need evidence (e.g. "best", "No.1", "guaranteed", "proven", "healthiest", "number one").
+  Descriptive lines, slogans and heritage statements ("brewed since 1921") are NOT claims.
 - "slate": a technical clock or slate card that is not part of the ad itself
 - "other_text": any other on-screen text
 
-For each item give:
+For each item:
 - text: the exact words (for a logo, the brand name)
 - source: "on_screen" or "spoken"
-- start, end: seconds from the start of the file, to the nearest 0.25 s. Use the first and
-  last frame where it is visible (or audible).
-- box_2d: for on-screen items, [ymin, xmin, ymax, xmax] normalised to 0-1000, tight around the
-  item. Omit for spoken items.
+- first_seen, last_seen: for on-screen items, the labelled times of the first and last frame where
+  it is visible. For spoken items, the start and end of the transcript segment.
+- box: for on-screen items, [top, left, bottom, right] as fractions of frame height/width (0-1),
+  tight around the item. null for spoken items.
 - confidence: 0 to 1
-If the same text appears in two separate intervals, report it twice."""
+For speech, report only disclaimers and claims, never ordinary narration.
+If the same item disappears and comes back, report each interval separately.
+
+Transcript:
+{transcript}"""
 
 SCHEMA = {
-    "type": "OBJECT",
+    "type": "object",
+    "additionalProperties": False,
     "properties": {
         "detections": {
-            "type": "ARRAY",
+            "type": "array",
             "items": {
-                "type": "OBJECT",
+                "type": "object",
+                "additionalProperties": False,
                 "properties": {
-                    "type": {"type": "STRING", "enum": ["disclaimer", "logo", "claim", "slate", "other_text"]},
-                    "text": {"type": "STRING"},
-                    "source": {"type": "STRING", "enum": ["on_screen", "spoken"]},
-                    "start": {"type": "NUMBER"},
-                    "end": {"type": "NUMBER"},
-                    "box_2d": {"type": "ARRAY", "items": {"type": "NUMBER"}},
-                    "confidence": {"type": "NUMBER"},
+                    "type": {"type": "string", "enum": ["disclaimer", "logo", "claim", "slate", "other_text"]},
+                    "text": {"type": "string"},
+                    "source": {"type": "string", "enum": ["on_screen", "spoken"]},
+                    "first_seen": {"type": "number"},
+                    "last_seen": {"type": "number"},
+                    "box": {"anyOf": [{"type": "array", "items": {"type": "number"}}, {"type": "null"}]},
+                    "confidence": {"type": "number"},
                 },
-                "required": ["type", "text", "source", "start", "end", "confidence"],
+                "required": ["type", "text", "source", "first_seen", "last_seen", "box", "confidence"],
             },
         }
     },
@@ -118,54 +143,140 @@ SCHEMA = {
 }
 
 
-def proxy_for_model(path):
-    """Send the model a small 720p H.264 proxy: Gemini cannot read MXF, and a
-    delivery master at broadcast bitrate is slow to upload for no gain in detection."""
-    tmp = tempfile.NamedTemporaryFile(suffix=".mp4", delete=False).name
-    subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-i", path, "-vf", "scale=-2:720",
-                    "-c:v", "libx264", "-crf", "23", "-c:a", "aac", tmp], check=True)
-    return tmp, tmp
+def duration_of(path):
+    log = subprocess.run([FFMPEG, "-hide_banner", "-i", path], capture_output=True, text=True).stderr
+    m = re.search(r"Duration: (\d+):(\d+):([\d.]+)", log)
+    return int(m.group(1)) * 3600 + int(m.group(2)) * 60 + float(m.group(3)) if m else 30.0
+
+
+def sample_frames(path, workdir):
+    """Returns [(start, end, file)]: keyframes where the picture changes, each covering the
+    interval until the next keyframe."""
+    from PIL import Image, ImageChops
+
+    duration = duration_of(path)
+    w, h = FRAME_SIZE
+    subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-i", path,
+                    "-vf", f"fps={SAMPLE_FPS},scale={w}:{h}:force_original_aspect_ratio=decrease", "-q:v", "3",
+                    os.path.join(workdir, "f%05d.jpg")], check=True)
+    files = sorted(os.path.join(workdir, f) for f in os.listdir(workdir) if f.endswith(".jpg"))
+    step = 1 / SAMPLE_FPS
+    thumbs = [Image.open(f).convert("L").resize((160, 90)) for f in files]
+    sharp = lambda a, b: sum(ImageChops.difference(a, b).point(lambda v: 255 if v > PIXEL_DELTA else 0)
+                             .histogram()[255:]) / (160 * 90)
+    diffs = [1.0] + [sharp(a, b) for a, b in zip(thumbs, thumbs[1:])]
+    keep, last = [], -KEYFRAME_EVERY
+    for i, d in enumerate(diffs):
+        if d > CHANGED_SHARE or i * step - last >= KEYFRAME_EVERY:
+            keep.append(i)
+            last = i * step
+    if len(keep) > MAX_FRAMES:
+        # Busy footage: keep the biggest changes, always keep the first frame.
+        keep = sorted([0] + sorted(keep[1:], key=lambda i: diffs[i], reverse=True)[:MAX_FRAMES - 1])
+    bounds = [i * step for i in keep] + [duration]
+    return [(round(bounds[n], 2), round(bounds[n + 1], 2), files[i]) for n, i in enumerate(keep)]
+
+
+def refine_box(d, frames):
+    """Model boxes are coarse. Measure the real edges from the pixels that change when the item
+    appears: compare its first frame with the previous keyframe, inside a window around the
+    model's estimate. Returns None when there is no previous frame or no clear change."""
+    from PIL import Image, ImageChops
+
+    starts = [round(f[0], 2) for f in frames]
+    i = min(range(len(starts)), key=lambda k: abs(starts[k] - d["first_seen"]))
+    if i == 0:
+        return None
+    cur = Image.open(frames[i][2]).convert("L")
+    prev = Image.open(frames[i - 1][2]).convert("L")
+    w, h = cur.size
+    top, left, bottom, right = d["box"]
+    y0, y1 = max(0, int((top - 0.15) * h)), min(h, int((bottom + 0.15) * h))
+    x0, x1 = max(0, int((left - 0.1) * w)), min(w, int((right + 0.1) * w))
+    if y1 <= y0 or x1 <= x0:
+        return None
+    diff = ImageChops.difference(cur, prev).crop((x0, y0, x1, y1)).point(lambda v: 255 if v > PIXEL_DELTA else 0)
+    cw, ch = diff.size
+    px = diff.load()
+    rows = [y for y in range(ch) if sum(1 for x in range(cw) if px[x, y]) > 0.02 * cw]
+    cols = [x for x in range(cw) if sum(1 for y in range(ch) if px[x, y]) > 0.02 * ch]
+    if not rows or not cols:
+        return None
+    return {"top": round((y0 + rows[0]) / h, 3), "bottom": round((y0 + rows[-1] + 1) / h, 3),
+            "left": round((x0 + cols[0]) / w, 3), "right": round((x0 + cols[-1] + 1) / w, 3)}
+
+
+def transcribe(client, path, workdir):
+    audio = os.path.join(workdir, "audio.mp3")
+    proc = subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-i", path, "-vn", "-ac", "1", "-ar", "16000",
+                           "-b:a", "48k", audio])
+    if proc.returncode != 0 or not os.path.exists(audio):
+        return []
+    with open(audio, "rb") as f:
+        result = client.audio.transcriptions.create(model=TRANSCRIBE_MODEL, file=f, response_format="verbose_json",
+                                                    timestamp_granularities=["segment"])
+    return [{"start": round(seg.start, 2), "end": round(seg.end, 2), "text": seg.text.strip()}
+            for seg in (result.segments or [])]
 
 
 def detect_content(path):
-    from google import genai
-    from google.genai import types
+    from openai import OpenAI, RateLimitError
 
-    key = os.environ.get("GEMINI_API_KEY")
-    if not key:
-        return {"model": MODEL, "error": "GEMINI_API_KEY is not set", "detections": []}
-    client = genai.Client(api_key=key)
-    model_path, cleanup = proxy_for_model(path)
+    if not os.environ.get("OPENAI_API_KEY"):
+        return {"model": MODEL, "error": "OPENAI_API_KEY is not set", "detections": []}
+    client = OpenAI()
     started = time.time()
-    try:
-        uploaded = client.files.upload(file=model_path, config={"mime_type": "video/mp4"})
-        while uploaded.state and uploaded.state.name == "PROCESSING":
-            time.sleep(2)
-            uploaded = client.files.get(name=uploaded.name)
-        response = client.models.generate_content(
-            model=MODEL,
-            contents=[types.Content(parts=[
-                types.Part(file_data=types.FileData(file_uri=uploaded.uri, mime_type="video/mp4"),
-                           video_metadata=types.VideoMetadata(fps=SAMPLE_FPS)),
-                types.Part(text=PROMPT),
-            ])],
-            config=types.GenerateContentConfig(
-                temperature=0, response_mime_type="application/json", response_schema=SCHEMA),
-        )
-        detections = json.loads(response.text)["detections"]
-        try:
-            client.files.delete(name=uploaded.name)
-        except Exception:
-            pass
-    finally:
-        if cleanup:
-            os.remove(cleanup)
-    for d in detections:
-        box = d.get("box_2d")
-        if box and len(box) == 4:
-            d["box"] = {"top": box[0] / 1000, "left": box[1] / 1000, "bottom": box[2] / 1000, "right": box[3] / 1000}
-        d.pop("box_2d", None)
-    return {"model": MODEL, "sample_fps": SAMPLE_FPS, "seconds": round(time.time() - started, 1),
+    with tempfile.TemporaryDirectory() as workdir:
+        frames = sample_frames(path, workdir)
+        segments = transcribe(client, path, workdir)
+        transcript = "\n".join(f"[{s['start']:.2f}-{s['end']:.2f}] {s['text']}" for s in segments) or "(no speech)"
+        content = [{"type": "text", "text": PROMPT.format(transcript=transcript)}]
+        for start, end, frame in frames:
+            with open(frame, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode()
+            content.append({"type": "text", "text": f"Frame at {start:.2f}s (picture unchanged until {end:.2f}s)"})
+            content.append({"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{b64}", "detail": "high"}})
+        for attempt in range(3):
+            try:
+                response = client.chat.completions.create(
+                    model=MODEL, temperature=0,
+                    messages=[{"role": "user", "content": content}],
+                    response_format={"type": "json_schema",
+                                     "json_schema": {"name": "detections", "strict": True, "schema": SCHEMA}},
+                )
+                break
+            except RateLimitError:
+                # One video uses most of a 30k tokens-per-minute budget: wait for the window to reset.
+                if attempt == 2:
+                    raise
+                time.sleep(65)
+        raw = json.loads(response.choices[0].message.content)["detections"]
+        refined = {}
+        for n, d in enumerate(raw):
+            if d["source"] == "on_screen" and d.get("box"):
+                refined[n] = refine_box(d, frames)
+    # Timing comes from the frames, not the model: map last_seen to the end of that frame's interval.
+    frame_end = {round(start, 2): end for start, end, _ in frames}
+    duration = frames[-1][1] if frames else 0
+    detections = []
+    for n, d in enumerate(raw):
+        if d["first_seen"] >= duration:
+            continue  # the model sometimes repeats a spoken line past the end of the file
+        if d["source"] == "on_screen":
+            last = min(frame_end, key=lambda t: abs(t - d["last_seen"]))
+            start, end = d["first_seen"], frame_end[last]
+        else:
+            start, end = d["first_seen"], d["last_seen"]
+        item = {"type": d["type"], "text": d["text"], "source": d["source"],
+                "start": round(start, 2), "end": round(end, 2), "confidence": d["confidence"]}
+        if refined.get(n):
+            item["box"], item["box_method"] = refined[n], "pixel change around the model's estimate"
+        elif d.get("box") and len(d["box"]) == 4:
+            b = d["box"]
+            item["box"], item["box_method"] = {"top": b[0], "left": b[1], "bottom": b[2], "right": b[3]}, "model estimate"
+        detections.append(item)
+    return {"model": MODEL, "transcribe_model": TRANSCRIBE_MODEL, "sample_fps": SAMPLE_FPS,
+            "frames": len(frames), "transcript": segments, "seconds": round(time.time() - started, 1),
             "detections": sorted(detections, key=lambda d: d["start"])}
 
 

@@ -123,14 +123,25 @@ function timeline() {
   const dur = verdict.asset.duration || 1;
   const pct = (s) => `${Math.max(0, Math.min(100, (s / dur) * 100))}%`;
   const seg = (d, cls, label, color) =>
-    `<div class="seg ${cls}" title="${esc(label)}" style="left:${pct(d.start)};width:calc(${pct(d.end - d.start)} + 2px);${color ? `background:${color}` : ""}">${esc(label)}</div>`;
+    `<div class="seg ${cls}" title="${esc(label)}" style="STYLE_SLOT left:${pct(d.start)};width:calc(${pct(d.end - d.start)} + 2px);${color ? `background:${color}` : ""}">${esc(label)}</div>`.replace("STYLE_SLOT ", "");
   const types = ["slate", "disclaimer", "logo", "claim"];
-  const lane = (label, items) => `<div class="track"><div class="track-label">${label}</div><div class="lane">${items}</div></div>`;
+  const lane = (label, items, rows = 1) => `<div class="track"><div class="track-label">${label}</div><div class="lane" style="height:${rows * 24 + 2}px">${items}</div></div>`;
+  // Overlapping items (a disclaimer on a slate) get their own row instead of hiding each other.
+  const stacked = (items, labelOf) => {
+    const ends = [];
+    const html = [...items].sort((a, b) => a.start - b.start).map((d) => {
+      let row = ends.findIndex((e) => e <= d.start + 0.01);
+      if (row === -1) { row = ends.length; ends.push(0); }
+      ends[row] = d.end;
+      return seg(d, "", labelOf(d), color(d.type)).replace('style="', `style="top:${row * 24 + 3}px;bottom:auto;height:20px;`);
+    }).join("");
+    return [html, Math.max(1, ends.length)];
+  };
   const color = (t) => `var(--c-${t})`;
   const det = verdict.detections.filter((d) => types.includes(d.type));
-  let html = lane("Model detected", det.map((d) => seg(d, "", `${d.type}: ${d.text}`, color(d.type))).join(""));
+  let html = lane("Model detected", ...stacked(det, (d) => `${d.type}: ${d.text}`));
   if (truth) {
-    html += lane("Ground truth", truth.objects.filter((o) => types.includes(o.type)).map((o) => seg(o, "", `${o.type}: ${o.text || ""}`, color(o.type))).join(""));
+    html += lane("Ground truth", ...stacked(truth.objects.filter((o) => types.includes(o.type)), (o) => `${o.type}${o.text ? ": " + o.text : ""}`));
   }
   const black = verdict.analysis.signal?.black_segments || [];
   html += lane("Signal: black", black.map((b) => seg(b, "black", "black")).join(""));
@@ -150,7 +161,9 @@ function value(v) {
 function detail() {
   const r = verdict.results.find((x) => x.id === selected);
   let html = `<div class="result-head"><div><p class="eyebrow">Selected destination</p><h2>${esc(r.name)}</h2><p class="muted">${esc(r.market)}</p></div>${pill(r.overall)}</div>`;
-  for (const layer of LAYERS) {
+  const rank = { FIX: 0, REVIEW: 1, WARN: 2, PASS: 3, "N/A": 4 };
+  // On a tie, content layers first: they are what v2 adds.
+  for (const layer of ["editorial", "brand", "technical", "rights"].sort((a, b) => rank[r.status[a]] - rank[r.status[b]])) {
     const checks = r.layers[layer];
     html += `<div class="layer"><h3>${LAYER_NAMES[layer]} ${pill(r.status[layer])}</h3>`;
     if (!checks.length) {
@@ -182,7 +195,7 @@ function render() {
   $("asset-sub").textContent = [a.container?.toUpperCase(), a.resolution, a.frame_rate && `${a.frame_rate} fps`, a.duration && `${a.duration.toFixed(2)} s`,
     an.signal?.integrated_loudness != null && `${an.signal.integrated_loudness} LUFS`, an.signal?.true_peak != null && `${an.signal.true_peak} dBTP`].filter(Boolean).join(" · ");
   $("origin").textContent = c.error ? `Content analysis unavailable: ${c.error}`
-    : `${an.cached ? "Cached result from " + an.analysed_at.replace("T", " ").replace("+00:00", " UTC") : "Live analysis"} · ${c.model} at ${c.sample_fps} fps`;
+    : `${an.cached ? "Cached result from " + an.analysed_at.replace("T", " ").replace("+00:00", " UTC") : "Live analysis"} · ${c.model} on ${c.frames ?? "?"} changed frames + ${c.transcribe_model || "transcript"}`;
   $("content-basis").innerHTML = `<b>Commercial starts at ${verdict.content.seconds.toFixed(2)}s.</b> Basis: ${esc(verdict.content.basis)}.`;
   timeline();
   $("rows").innerHTML = verdict.results.map((r) => `<tr class="row ${r.id === selected ? "sel" : ""}" data-id="${r.id}">
