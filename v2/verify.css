@@ -89,3 +89,8 @@ table.grid { width: 100%; border-collapse: collapse; }
   .legend, .basis { margin-left: 0; }
   .check { grid-template-columns: 1fr; gap: 4px; }
 }
+
+.version-switch { display: inline-flex; border: 1px solid #c9d0cb; border-radius: 999px; padding: 3px; background: #fff; gap: 2px; }
+.version-switch a { padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; color: #5d6b63; text-decoration: none; white-space: nowrap; }
+.version-switch a.on { background: #17a34a; color: #fff; }
+.header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }

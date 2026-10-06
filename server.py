@@ -205,9 +205,20 @@ async def analyze(file: UploadFile = File(...)):
     return result
 
 
+# Same paths as the Netlify site: "/" is v1, "/v2/verify.html" is v2.
+V1_FILES = {"index.html", "app.js", "styles.css", "static-overrides.css", "favicon.svg"}
+
+
 @app.get("/")
 def index():
-    return FileResponse(os.path.join(ROOT, "v2", "verify.html"))
+    return FileResponse(os.path.join(ROOT, "index.html"))
+
+
+@app.get("/{name}")
+def v1_file(name: str):
+    if name not in V1_FILES:
+        raise HTTPException(404)
+    return FileResponse(os.path.join(ROOT, name))
 
 
 # Only these folders are public. Never mount ROOT: it holds .env.

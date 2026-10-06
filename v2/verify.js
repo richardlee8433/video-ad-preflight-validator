@@ -98,9 +98,15 @@ async function run() {
     const asset = await inspect(file);
     step("meta", "done"); step("server", "doing");
     const form = new FormData(); form.append("file", file);
-    const res = await fetch("/api/analyze", { method: "POST", body: form });
-    if (!res.ok) throw new Error(`Analysis failed (${res.status})`);
-    const analysis = await res.json();
+    let analysis;
+    try {
+      const res = await fetch("/api/analyze", { method: "POST", body: form });
+      if (!res.ok) throw new Error(String(res.status));
+      analysis = await res.json();
+    } catch {
+      // Static hosting (e.g. Netlify) has no analysis server: keep the metadata checks, say what is missing.
+      analysis = { signal: null, content: { error: "analysis server not running on this host. Run server.py locally for loudness, black and content checks" } };
+    }
     step("server", "done"); step("rules", "doing");
     const { brand, destinations } = await rulesReady;
     verdict = Engine.verify({ asset, analysis, destinations, brand, activeDuration: Number($("active").value) || null });
@@ -192,7 +198,9 @@ $("fixtures").innerHTML = FIXTURES.map(([id, label]) => `<button type="button" d
 document.querySelectorAll("#fixtures button").forEach((b) => b.addEventListener("click", async () => {
   document.querySelectorAll("#fixtures button").forEach((x) => x.classList.toggle("on", x === b));
   const id = b.dataset.id;
-  const [blob, t] = await Promise.all([fetch(`/fixtures/${id}.mp4`).then((r) => r.blob()), fetch(`/fixtures/${id}.truth.json`).then((r) => r.json())]);
+  const video = await fetch(`/fixtures/${id}.mp4`);
+  if (!video.ok) { $("error").textContent = "Test ads are generated locally (python3 tools/make_fixtures.py) and are not published with the site."; $("error").hidden = false; return; }
+  const [blob, t] = await Promise.all([video.blob(), fetch(`/fixtures/${id}.truth.json`).then((r) => r.json())]);
   $("active").value = 30;
   choose(new File([blob], `${id}.mp4`, { type: "video/mp4" }), t);
   run();
