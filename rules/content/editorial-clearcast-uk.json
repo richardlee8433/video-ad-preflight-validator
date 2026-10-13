@@ -16,18 +16,36 @@
       "explanation": "Alcohol advertising must carry the responsible-drinking line."
     },
     {
-      "id": "clearcast-disclaimer-hold",
+      "id": "clearcast-supers-hold",
       "layer": "editorial",
-      "operator": "min_on_screen",
+      "operator": "supers_hold",
+      "params": {
+        "type": "disclaimer",
+        "text_contains": "responsibly"
+      },
+      "severity": "error",
+      "source": "BCAP Advertising Guidance: Use of superimposed text in television advertising",
+      "source_url": "https://www.asa.org.uk/static/d0048ae3-1bc3-42b4-baebcda68b7bac88/Superimposed-text-BCAP-Guidance-0425.pdf",
+      "version": "sections 8.2-8.3 (retrieved 2026-10-13)",
+      "illustrative": false,
+      "explanation": "Supers must stay on screen long enough to read: 0.2 seconds per word, plus 2 seconds to recognise the text (3 seconds for 10 words or more)."
+    },
+    {
+      "id": "clearcast-supers-size",
+      "layer": "editorial",
+      "operator": "min_text_height",
       "params": {
         "type": "disclaimer",
         "text_contains": "responsibly",
-        "seconds": 3
+        "preferred": 30,
+        "minimum": 26
       },
       "severity": "error",
-      "source": "Illustrative rule for this demo, not quoted from a published code",
-      "illustrative": true,
-      "explanation": "Broadcast supers need a minimum hold time to be legible."
+      "source": "BCAP Advertising Guidance: Use of superimposed text in television advertising",
+      "source_url": "https://www.asa.org.uk/static/d0048ae3-1bc3-42b4-baebcda68b7bac88/Superimposed-text-BCAP-Guidance-0425.pdf",
+      "version": "sections 5.2-5.5 (retrieved 2026-10-13)",
+      "illustrative": false,
+      "explanation": "Text height is the x-height of lower-case letters in TV lines at 1080, ignoring risers and descenders. 30 lines preferred; 26 only on a single-colour opaque block."
     },
     {
       "id": "clearcast-disclaimer-safe",

@@ -88,6 +88,30 @@
         return out(inside.length ? "PASS" : "FAIL", where, `after content start at ${fmt(start)}`, { basis: ctx.content.basis });
       }
 
+      case "supers_hold": {
+        // BCAP superimposed text guidance 8.2-8.3: 0.2s per word, plus 2s recognition for 9 words
+        // or fewer, 3s for 10 or more. Signs such as "%" or "£" on their own are not words (8.5).
+        const onScreen = found.filter((d) => d.source === "on_screen");
+        if (!onScreen.length) return out("FAIL", "Not found", "on screen long enough to read");
+        const d = onScreen.reduce((a, b) => (b.end - b.start > a.end - a.start ? b : a));
+        const words = d.text.split(/\s+/).filter((w) => /[\p{L}\p{N}]/u.test(w)).length;
+        const required = Number((words * 0.2 + (words <= 9 ? 2 : 3)).toFixed(2));
+        const held = d.end - d.start;
+        return out(held >= required ? "PASS" : "FAIL", `${fmt(held)} on screen, ${words} words`,
+          `≥ ${fmt(required)} (${words} × 0.2s + ${words <= 9 ? 2 : 3}s recognition)`);
+      }
+
+      case "min_text_height": {
+        // BCAP superimposed text guidance 5.2-5.5: x-height in TV lines at 1080. 30 lines preferred,
+        // 26 lines minimum only when the text sits on a single-colour opaque block.
+        const measured = found.filter((d) => typeof d.x_height_lines === "number");
+        if (!measured.length) return out("NOT_EVALUATED", found.length ? "Text height not measured" : "Not found", `≥ ${p.preferred} TV lines`);
+        const lines = Math.min(...measured.map((d) => d.x_height_lines));
+        const result = lines >= p.preferred ? "PASS" : lines >= p.minimum ? "REVIEW" : "FAIL";
+        const note = result === "REVIEW" ? " (allowed only on a single-colour opaque block: check by eye)" : "";
+        return out(result, `${lines} TV lines x-height${note}`, `≥ ${p.preferred} lines preferred, ${p.minimum} minimum on an opaque block`);
+      }
+
       case "in_final_seconds": {
         if (!found.length) return out("FAIL", "Not found", `in the last ${p.seconds}s`);
         const from = ctx.duration - p.seconds;

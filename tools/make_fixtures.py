@@ -87,7 +87,17 @@ def render(name, duration, filters, vo_script, vo_start, truth):
 
 
 # Shared creative beats for the 30-second spot. `o` offsets everything for the slate version.
-def spot(o=0, disclaimer=(25, 30), disclaimer_y=900, with_logo=True, claim_card=None):
+DISCLAIMER_SIZE = 60  # Arial x-height ~0.52 em -> ~31 TV lines at 1080, above the BCAP 30-line preference
+
+
+def x_height_lines(size, font=FONT_REG):
+    """Ground truth x-height in 1080 TV lines, measured on a flat-topped letter as BCAP specifies."""
+    from PIL import ImageFont
+    left, top, right, bottom = ImageFont.truetype(font, size).getbbox("x")
+    return bottom - top
+
+
+def spot(o=0, disclaimer=(25, 30), disclaimer_y=900, with_logo=True, claim_card=None, disclaimer_size=DISCLAIMER_SIZE):
     f = [
         text("The long evenings are back.", 2 + o, 9 + o, "(w-text_w)/2", "(h-text_h)/2", 84),
         text("Brewed slow in Kilkenny since 1921.", 10 + o, 17 + o, "(w-text_w)/2", "(h-text_h)/2", 72),
@@ -98,8 +108,8 @@ def spot(o=0, disclaimer=(25, 30), disclaimer_y=900, with_logo=True, claim_card=
     if with_logo:
         f.append(logo(25 + o, 30 + o))
     if disclaimer:
-        f.append(text(DISCLAIMER, disclaimer[0] + o, disclaimer[1] + o, "(w-text_w)/2", str(disclaimer_y), 40,
-                      font=FONT_REG, box=True))
+        f.append(text(DISCLAIMER, disclaimer[0] + o, disclaimer[1] + o, "(w-text_w)/2", str(disclaimer_y),
+                      disclaimer_size, font=FONT_REG, box=True))
     return f
 
 
@@ -110,9 +120,9 @@ VO_CLAIM = ("The long evenings are back. Northlight is the best lager in Ireland
 title_safe_bottom = 0.95  # title-safe area: 5% margin on each edge
 
 
-def disclaimer_truth(start, end, y):
+def disclaimer_truth(start, end, y, size=DISCLAIMER_SIZE):
     return {"type": "disclaimer", "text": DISCLAIMER, "start": start, "end": end,
-            "bbox_y_bottom": round((y + 40 + 18) / H, 3)}
+            "bbox_y_bottom": round((y + size + 18) / H, 3), "x_height_lines": x_height_lines(size)}
 
 
 if __name__ == "__main__":
@@ -127,6 +137,10 @@ if __name__ == "__main__":
     render("ad_unsafe_area", 30, spot(disclaimer_y=H - 50), VO_CLEAN, 1.5, {
         "expected": {"technical": "pass", "brand": "pass", "editorial": "fix: disclaimer outside title-safe area"},
         "objects": [disclaimer_truth(25, 30, H - 50), {"type": "logo", "text": "NORTHLIGHT", "start": 25, "end": 30}],
+    })
+    render("ad_small_disclaimer", 30, spot(disclaimer_size=40), VO_CLEAN, 1.5, {
+        "expected": {"technical": "pass", "brand": "pass", "editorial": "fix: disclaimer text below 26 TV lines (Clearcast)"},
+        "objects": [disclaimer_truth(25, 30, 900, size=40), {"type": "logo", "text": "NORTHLIGHT", "start": 25, "end": 30}],
     })
     render("ad_claim_no_logo", 30, spot(with_logo=False, claim_card="No.1 lager in Ireland"), VO_CLAIM, 1.5, {
         "expected": {"technical": "pass", "brand": "fix: no end-card logo",
@@ -143,7 +157,7 @@ if __name__ == "__main__":
         text("NORTHLIGHT  -  The Long Evenings", 0, 7, "(w-text_w)/2", "300", 72),
         text("Clock No. NLB/LONG001/030    Duration 30s", 0, 7, "(w-text_w)/2", "420", 56, font=FONT_REG),
         text("Agency: Halfmoon    Advertiser: Northlight Brewing", 0, 7, "(w-text_w)/2", "520", 48, font=FONT_REG),
-        text(DISCLAIMER, 0, 7, "(w-text_w)/2", "760", 40, font=FONT_REG, box=True),
+        text(DISCLAIMER, 0, 7, "(w-text_w)/2", "760", DISCLAIMER_SIZE, font=FONT_REG, box=True),
         f"drawbox=x=0:y=0:w={W}:h={H}:color=black@1:t=fill:enable='between(t,7,10)'",
     ]
     render("ad_broadcast_slate", 40, slate + spot(o=10, disclaimer=None), VO_CLEAN, 11.5, {
@@ -151,6 +165,7 @@ if __name__ == "__main__":
                      "editorial": "fix: disclaimer only on slate, not in active content"},
         "content_start": 10,
         "objects": [{"type": "slate", "start": 0, "end": 7},
-                    {"type": "disclaimer", "text": DISCLAIMER, "start": 0, "end": 7, "note": "on slate"},
+                    {"type": "disclaimer", "text": DISCLAIMER, "start": 0, "end": 7, "note": "on slate",
+                     "x_height_lines": x_height_lines(DISCLAIMER_SIZE)},
                     {"type": "logo", "text": "NORTHLIGHT", "start": 35, "end": 40}],
     })

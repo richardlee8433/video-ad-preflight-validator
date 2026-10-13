@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import server  # noqa: E402
 
 FIXTURES = os.path.join(server.ROOT, "fixtures")
-NAMES = ["ad_pass", "ad_short_disclaimer", "ad_unsafe_area", "ad_claim_no_logo", "ad_broadcast_slate"]
+NAMES = ["ad_pass", "ad_short_disclaimer", "ad_unsafe_area", "ad_small_disclaimer", "ad_claim_no_logo", "ad_broadcast_slate"]
 
 
 def analyse(name, force):
@@ -60,6 +60,8 @@ def score(name, result):
         extra = ""
         if "bbox_y_bottom" in obj and d.get("box"):
             extra = f"  box bottom {d['box']['bottom']:.3f} vs truth {obj['bbox_y_bottom']:.3f}"
+        if "x_height_lines" in obj:
+            extra += f"  x-height {d.get('x_height_lines')} vs truth {obj['x_height_lines']} lines"
         print(f"  found   {obj['type']:<10} truth {obj['start']:>5}-{obj['end']:<5} model {d['start']:>5}-{d['end']:<5}"
               f"  err {ds:+.2f}/{de:+.2f}s  conf {d['confidence']:.2f}{extra}")
         rows.append(("found", obj["type"], abs(ds), abs(de)))

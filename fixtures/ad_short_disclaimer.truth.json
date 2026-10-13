@@ -12,7 +12,8 @@
       "text": "Please enjoy Northlight responsibly. drinkaware.ie",
       "start": 28.8,
       "end": 30,
-      "bbox_y_bottom": 0.887
+      "bbox_y_bottom": 0.906,
+      "x_height_lines": 31
     },
     {
       "type": "logo",

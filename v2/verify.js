@@ -7,6 +7,7 @@ const FIXTURES = [
   ["ad_pass", "Clean spot"],
   ["ad_short_disclaimer", "Short disclaimer"],
   ["ad_unsafe_area", "Disclaimer off-safe"],
+  ["ad_small_disclaimer", "Small disclaimer"],
   ["ad_claim_no_logo", "Claims, no logo"],
   ["ad_broadcast_slate", "Broadcast slate"],
 ];

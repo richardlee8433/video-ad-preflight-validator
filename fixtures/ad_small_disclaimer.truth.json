@@ -1,0 +1,25 @@
+{
+  "file": "ad_small_disclaimer.mp4",
+  "duration": 30,
+  "expected": {
+    "technical": "pass",
+    "brand": "pass",
+    "editorial": "fix: disclaimer text below 26 TV lines (Clearcast)"
+  },
+  "objects": [
+    {
+      "type": "disclaimer",
+      "text": "Please enjoy Northlight responsibly. drinkaware.ie",
+      "start": 25,
+      "end": 30,
+      "bbox_y_bottom": 0.887,
+      "x_height_lines": 21
+    },
+    {
+      "type": "logo",
+      "text": "NORTHLIGHT",
+      "start": 25,
+      "end": 30
+    }
+  ]
+}

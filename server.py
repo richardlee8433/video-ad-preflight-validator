@@ -206,6 +206,44 @@ def refine_box(d, frames):
             "left": round((x0 + cols[0]) / w, 3), "right": round((x0 + cols[-1] + 1) / w, 3)}
 
 
+def measure_x_height(path, d, box):
+    """Text size the way BCAP measures it (superimposed text guidance, section 5 and appendix 2):
+    the x-height of lower-case letters in TV lines at 1080, ignoring risers, descenders and the
+    weaker anti-aliased lines at the edges. Rows inside the x-height band carry ink in almost every
+    letter; ascender and descender rows only in some, so the band is the densest run of rows."""
+    from PIL import Image
+
+    mid = (d["start"] + d["end"]) / 2
+    with tempfile.TemporaryDirectory() as tmp:
+        png = os.path.join(tmp, "f.png")
+        subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-ss", f"{mid:.2f}", "-i", path, "-frames:v", "1",
+                        "-vf", "scale=-2:1080", png], check=True)
+        img = Image.open(png).convert("L")
+    w, h = img.size
+    pad = 0.01
+    crop = img.crop((max(0, int((box["left"] - pad) * w)), max(0, int((box["top"] - pad) * h)),
+                     min(w, int((box["right"] + pad) * w)), min(h, int((box["bottom"] + pad) * h))))
+    cw, ch = crop.size
+    if cw < 10 or ch < 5:
+        return None
+    px = list(crop.getdata())
+    background = sorted(px)[len(px) // 2]  # most of a caption box is background
+    full_strength = 90  # ignore faint anti-aliased edge lines
+    counts = [sum(1 for x in range(cw) if abs(px[y * cw + x] - background) > full_strength) for y in range(ch)]
+    peak = max(counts)
+    if peak == 0:
+        return None
+    # Inside the x-height band, rows with horizontal strokes (tops and bottoms of letters) are dense and
+    # rows with only vertical stems are about half as dense; ascender/descender rows are far sparser
+    # (~10% of peak on real captions), so 35% of the peak separates the band from them.
+    dense = [c >= 0.35 * peak for c in counts]
+    best = run = 0
+    for flag in dense:
+        run = run + 1 if flag else 0
+        best = max(best, run)
+    return best
+
+
 def transcribe(client, path, workdir):
     audio = os.path.join(workdir, "audio.mp3")
     proc = subprocess.run([FFMPEG, "-y", "-loglevel", "error", "-i", path, "-vn", "-ac", "1", "-ar", "16000",
@@ -274,6 +312,8 @@ def detect_content(path):
         elif d.get("box") and len(d["box"]) == 4:
             b = d["box"]
             item["box"], item["box_method"] = {"top": b[0], "left": b[1], "bottom": b[2], "right": b[3]}, "model estimate"
+        if item["type"] == "disclaimer" and item.get("box") and item["source"] == "on_screen":
+            item["x_height_lines"] = measure_x_height(path, item, item["box"])
         detections.append(item)
     return {"model": MODEL, "transcribe_model": TRANSCRIBE_MODEL, "sample_fps": SAMPLE_FPS,
             "frames": len(frames), "transcript": segments, "seconds": round(time.time() - started, 1),
