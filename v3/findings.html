@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Preflight v3 findings</title>
+  <link rel="icon" href="/v3/favicon.svg">
+  <link rel="stylesheet" href="/v3/verify.css?v=1">
+  <style>
+    .finding { display: grid; gap: 12px; }
+    .finding h2 { font-size: 18px; }
+    .finding .num { color: var(--green); margin-right: 6px; }
+    .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+    .pair.one { grid-template-columns: 1fr; }
+    figure { margin: 0; }
+    figure img { cursor: zoom-in; width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; display: block; background: #fff; }
+    figcaption { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    figcaption b { color: var(--ink); }
+    .tagline { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; border-radius: 4px; padding: 1px 6px; margin-right: 6px; }
+    .tagline.before { background: var(--red-bg); color: var(--red); }
+    .tagline.after { background: var(--green-bg); color: var(--green); }
+    .tagline.video { background: var(--grey-bg); color: var(--muted); }
+    .why { font-size: 14px; color: var(--muted); margin: 0; }
+    .why b { color: var(--ink); }
+    .sources { font-size: 13px; color: var(--muted); }
+    .sources a { color: var(--muted); }
+    table.summary { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .summary th, .summary td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    .summary th { font-size: 12px; color: var(--muted); }
+    @media (max-width: 720px) { .pair { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <p class="eyebrow">Video ad pre-flight · v3 findings</p>
+      <h1>What real ads showed that test ads could not</h1>
+      <p class="lede">v2 scored 14 out of 14 on synthetic test ads with known ground truth. Two real broadcast ads exposed problems the synthetic ads were too clean to show. Each finding below has v2's own screen as evidence, the video frame showing what was really there, and the v3 result for the same file.</p>
+    </div>
+    <div class="header-right"><nav class="version-switch" aria-label="Version"><a href="/">v1 · Technical</a><a href="/v2/verify.html">v2 · Four layers</a><a href="/v3/verify.html" class="on">v3 · Real-ad fixes</a></nav></div>
+  </header>
+
+  <section class="card">
+    <h3>The two real ads</h3>
+    <p class="sources">Both are US government works in the public domain, from Wikimedia Commons, converted from WebM/OGV to H.264 MP4 for this tool (picture, sound and timing unchanged).<br>
+      <b>Navy-Marine Corps Relief Society, AFN commercial (2026)</b>: 60 s, 1920×1080, by the US Marine Corps. <a href="https://commons.wikimedia.org/wiki/File:Navy-Marine_Corps_Relief_Society;_AFN_Commercial_2026_(998299).webm" target="_blank" rel="noreferrer">Source</a><br>
+      <b>Your Action Saves Lives, Spanish (2020)</b>: 30 s, 1280×720, by the Office of the Governor of California. <a href="https://commons.wikimedia.org/wiki/File:Your_Action_Saves_Lives_-_Spanish_commercial_-_2020-08-02.ogv" target="_blank" rel="noreferrer">Source</a></p>
+    <table class="summary">
+      <thead><tr><th>#</th><th>Found in v2</th><th>Fixed in v3 by</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Rules that cannot apply to the ad failed it: an alcohol line and a fictional brand's logo were required of a charity spot and a health PSA</td><td>Rules declare which ads they cover; the ad's brand and category are declared; other rules are N/A</td></tr>
+        <tr><td>2</td><td>Name captions, an opening logo card and an end-card logo were never detected</td><td>OCR reads every changed frame, frame selection keeps frames with new text, and the model classifies what OCR read</td></tr>
+        <tr><td>3</td><td>Ten subtitles were detected but not shown: the page looked as if nothing was found</td><td>Every detection type is drawn, including supers</td></tr>
+        <tr><td>4</td><td>One backdrop logo came back as seven overlapping pieces</td><td>Pieces of the same item that overlap or touch are joined</td></tr>
+        <tr><td>5</td><td>Text boxes were the search window, not the text, so position checks were meaningless</td><td>Boxes are measured by OCR; a box only the model estimated is REVIEW</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="card finding">
+    <h2><span class="num">1</span>Rules that cannot apply failed the ad</h2>
+    <p class="why">v2 applied every rule to every ad. A charity spot and a health PSA were each failed for having no alcohol responsibility line and no logo of Northlight, the fictional beer brand the demo rules were written for. A missing disclaimer was then failed again by every rule about its timing and placement. <b>v3:</b> each rule says which ads it covers (<code>applies_when</code>: category, brand), the ad's brand and category are declared, and a rule with nothing to measure is N/A. Only the "present" rule judges whether something is missing.</p>
+    <div class="pair">
+      <figure><img src="/v3/evidence/before/ca-v2-grid.png" alt="v2 destination grid for the California PSA: Brand FIX and Editorial FIX for every destination"><figcaption><span class="tagline before">v2</span>California PSA: Brand <b>FIX</b> everywhere, for a brand the ad has nothing to do with.</figcaption></figure>
+      <figure><img src="/v3/evidence/after/ca-v3-grid.png" alt="v3 destination grid for the California PSA: Brand N/A"><figcaption><span class="tagline after">v3</span>Same file: Brand <b>N/A</b>. The remaining editorial result on Clearcast is about the subtitles themselves (finding 2).</figcaption></figure>
+    </div>
+    <div class="pair">
+      <figure><img src="/v3/evidence/before/ca-v2-clearcast.png" alt="v2 Clearcast detail: alcohol line, supers hold, active content and three brand rules all FAIL with Not found"><figcaption><span class="tagline before">v2</span>Six FAILs that all say "Not found": the alcohol line three ways, the Northlight logo three ways.</figcaption></figure>
+      <figure><img src="/v3/evidence/after/ca-v3-clearcast.png" alt="v3 Clearcast detail: alcohol rules N/A, supers hold and safe area evaluated on the real subtitles"><figcaption><span class="tagline after">v3</span>Alcohol rules N/A with the reason. The supers rules now check the ad's real subtitles, and fail on evidence, not on absence.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="card finding">
+    <h2><span class="num">2</span>Captions, an opening logo card and an end-card logo were missed</h2>
+    <p class="why">v2's prompt had no type for text the editor puts on screen, and its frame trimming kept only the biggest picture changes. A caption that slides in while the camera holds still is a small change, so it could be dropped before the model ever saw it. <b>v3:</b> Apple Vision OCR reads every changed frame (about four a second); frame selection keeps full coverage plus the frames where new text appears; the model gets each frame's OCR lines and a <code>super</code> type. OCR also times each text item from every changed frame. Checked against OCR at 8 frames a second, that timing was within 0.15 s.</p>
+    <div class="pair">
+      <figure><img src="/v3/evidence/before/afn-frame-opening-logo.jpg" alt="Frame at 4.5 seconds: full-screen Navy-Marine Corps Relief Society logo card"><figcaption><span class="tagline video">Video, 4.5 s</span>Opening logo card. v2's first logo started at 7.8 s.</figcaption></figure>
+      <figure><img src="/v3/evidence/before/afn-frame-name-super.jpg" alt="Frame at 10 seconds: name caption MAJGEN BRIAN WOLFORD, MCIPAC CG"><figcaption><span class="tagline video">Video, 10 s</span>One of three name captions. v2 found none of them.</figcaption></figure>
+    </div>
+    <div class="pair one">
+      <figure><img src="/v3/evidence/before/afn-v2-timeline.png" alt="v2 timeline for the Navy-Marine Corps ad: logo pieces and one claim, no captions"><figcaption><span class="tagline before">v2</span>Navy-Marine Corps ad: logo pieces and a claim. No captions, no opening card.</figcaption></figure>
+      <figure><img src="/v3/evidence/after/afn-v3-timeline.png" alt="v3 timeline for the Navy-Marine Corps ad: opening logo, three name captions, a phone-number super, a claim and the backdrop logo"><figcaption><span class="tagline after">v3</span>Opening logo card from 2.75 s, all three name captions, the help-line super, and the backdrop logo as four spans instead of seven pieces (finding 4).</figcaption></figure>
+    </div>
+    <div class="pair">
+      <figure><img src="/v3/evidence/before/ca-frame-end-card.jpg" alt="Frame at 29 seconds: end card with Haz tu parte, covid19.ca.gov/es and a California for All logo"><figcaption><span class="tagline video">Video, 29 s</span>End card: a tagline, a web address and the "California for All" logo. v2 reported no logo.</figcaption></figure>
+      <figure><img src="/v3/evidence/after/ca-v3-timeline.png" alt="v3 timeline for the California PSA: thirteen supers and the California for All logo"><figcaption><span class="tagline after">v3</span>Every subtitle, the end-card lines and the logo, each timed by OCR.</figcaption></figure>
+    </div>
+    <p class="why"><b>What v3 then found:</b> 11 of the PSA's 13 subtitles are on screen for less time than BCAP's reading-time guidance for supers (0.2 s a word plus 2–3 s). They follow the speech, as subtitles do. Whether that guidance should apply to subtitles of the voice-over is a reviewer's call; v3 shows the evidence instead of hiding the text.</p>
+  </section>
+
+  <section class="card finding">
+    <h2><span class="num">3</span>Detected text was hidden, so the page looked empty</h2>
+    <p class="why">v2 did detect the PSA's subtitles, as ten "other text" items, but its timeline drew only slates, disclaimers, logos and claims. The page showed an empty "Model detected" lane for an ad with text on screen for its whole length. <b>v3:</b> every detection type is drawn, and supers have their own colour.</p>
+    <div class="pair one">
+      <figure><img src="/v3/evidence/before/ca-v2-timeline.png" alt="v2 timeline for the California PSA with an empty Model detected lane"><figcaption><span class="tagline before">v2</span>California PSA: nothing in "Model detected", although ten items were in the result.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="card finding">
+    <h2><span class="num">4</span>One logo came back as seven pieces</h2>
+    <p class="why">The Navy-Marine Corps logo is on the backdrop behind the speakers for most of the ad. v2 returned it as seven intervals, several overlapping or touching end to end. <b>v3:</b> intervals of the same item (same type and text) that overlap or are less than a second apart are joined, and the timeline says how many were joined. The gaps that remain are real: the ad cuts to archive footage and an office.</p>
+    <div class="pair">
+      <figure><img src="/v3/evidence/before/afn-v2-timeline.png" alt="v2 timeline: seven logo segments, some overlapping"><figcaption><span class="tagline before">v2</span>Seven logo segments, stacked where they overlap.</figcaption></figure>
+      <figure><img src="/v3/evidence/after/afn-v3-timeline.png" alt="v3 timeline: four logo spans"><figcaption><span class="tagline after">v3</span>Four spans, each where the backdrop is actually in shot.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="card finding">
+    <h2><span class="num">5</span>Text positions were the search window, not the text</h2>
+    <p class="why">v2 measured a text box from the pixels that change when the text appears. When text arrives on a scene cut, every pixel changes, and v2 returned its whole search window as the box. Every subtitle in the PSA got the same box, from 65% of the frame height to the bottom edge, so the title-safe check was measuring the window. <b>v3:</b> boxes come from OCR, read in the middle of the item's time on screen because text often fades in. A box only the model estimated (a logo, or a system without OCR) cannot pass or fail a 5% margin: it is REVIEW.</p>
+    <div class="pair">
+      <figure><img src="/v3/evidence/before/ca-v2-box-overlay.jpg" alt="Subtitle frame with v2's red box covering the bottom third of the frame"><figcaption><span class="tagline before">v2</span>Red: v2's box for this subtitle, the same for all ten. Yellow: title-safe area.</figcaption></figure>
+      <figure><img src="/v3/evidence/after/ca-v3-box-overlay.jpg" alt="Same frame with v3's green box tight around the two subtitle lines"><figcaption><span class="tagline after">v3</span>Green: v3's OCR box. Its bottom edge is at 97.7% of the frame height, outside the 95% safe line. A real finding, now that the box is real.</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="card">
+    <h3>Nothing broke on the test ads</h3>
+    <p class="why">On the six synthetic test ads with ground truth, v3 finds all 14 objects, as v2 did, and its end-time error is lower (0.21 s against 0.64 s). With the test ads declared as Northlight beer ads, every destination and layer verdict is the same as v2's: 36 of 36.</p>
+  </section>
+
+  <section class="card">
+    <h3>Not solved yet</h3>
+    <ul class="why">
+      <li><b>Run-to-run variation.</b> The model does not return exactly the same items for the same file every time. OCR makes text detection far steadier, but logos, which OCR cannot always read, still vary.</li>
+      <li><b>Text size over footage.</b> BCAP measures x-height. That is reliable on a flat caption block and unreliable on text laid straight over moving pictures, so a small reading there is REVIEW, not FAIL.</li>
+      <li><b>OCR needs macOS</b> (Apple Vision). On another system boxes fall back to the model's estimate, which v3 reports as REVIEW for position checks.</li>
+    </ul>
+  </section>
+</main>
+<script>
+  // Screenshots are shrunk to fit side by side: open the full image in a new tab.
+  document.querySelectorAll("figure img").forEach((img) => {
+    const link = document.createElement("a");
+    link.href = img.getAttribute("src"); link.target = "_blank"; link.rel = "noreferrer";
+    img.replaceWith(link); link.append(img);
+  });
+</script>
+</body>
+</html>

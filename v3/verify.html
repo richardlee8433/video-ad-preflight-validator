@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Preflight v3</title>
+  <link rel="icon" href="/v3/favicon.svg">
+  <link rel="stylesheet" href="/v3/verify.css?v=1">
+  <script defer src="https://unpkg.com/mediainfo.js@0.3.7"></script>
+  <script defer src="/v3/engine.js?v=1"></script>
+  <script defer src="/v3/verify.js?v=1"></script>
+</head>
+<body>
+<main>
+  <header class="top">
+    <div>
+      <p class="eyebrow">Video ad pre-flight · v3</p>
+      <h1>One file. Four layers. Every destination.</h1>
+      <p class="lede">File metadata and signal measurements check the technical layer. OCR reads the on-screen text, a model classifies it and detects logos and claims with timecodes, and the same rule engine judges both. Rules apply only to the ads they cover, and every verdict cites its rule. <a href="/v3/findings.html">What v3 fixes, with evidence from real ads →</a></p>
+    </div>
+    <div class="header-right"><nav class="version-switch" aria-label="Version"><a href="/">v1 · Technical</a><a href="/v2/verify.html">v2 · Four layers</a><a href="/v3/verify.html" class="on" aria-current="page">v3 · Real-ad fixes</a></nav><span class="pill-outline">Ruleset 2026.10</span></div>
+  </header>
+
+  <section class="upload card">
+    <div id="drop" class="drop" tabindex="0" role="button" aria-label="Choose or drop a video file">
+      <input id="file" type="file" accept=".mp4,.mxf,video/mp4" hidden>
+      <div class="drop-icon">↑</div>
+      <div class="drop-copy"><strong id="file-name">Drop a video ad here</strong><span id="file-meta">MP4 or MXF</span></div>
+      <label class="active">Commercial length <input id="active" type="number" value="30" min="1" max="600"> s</label>
+      <label class="active">Brand <select id="brand"><option value="">Not declared</option><option value="northlight">Northlight (demo)</option></select></label>
+      <label class="active">Category <select id="category"><option value="">Other</option><option value="alcohol">Alcohol</option></select></label>
+      <button id="run" class="primary" type="button">Verify</button>
+    </div>
+    <div class="samples"><span>Test ads with known ground truth:</span><div id="fixtures"></div></div>
+    <ol id="steps" class="steps" hidden>
+      <li data-step="meta">Reading file metadata in the browser</li>
+      <li data-step="server">Measuring loudness and black, reading text with OCR, detecting content with the model</li>
+      <li data-step="rules">Applying the destination, brand and editorial rules that cover this ad</li>
+    </ol>
+    <p id="error" class="error" hidden></p>
+  </section>
+
+  <section id="results" hidden>
+    <div class="card">
+      <div class="result-head">
+        <div>
+          <h2 id="asset-title">—</h2>
+          <p id="asset-sub" class="muted"></p>
+        </div>
+        <span id="origin" class="origin"></span>
+      </div>
+      <div id="timeline" class="timeline"></div>
+      <p id="content-basis" class="basis"></p>
+    </div>
+
+    <div class="card">
+      <table class="grid">
+        <thead><tr><th>Destination</th><th>Technical</th><th>Brand</th><th>Editorial</th><th>Rights</th><th>Status</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <div class="card" id="detail"></div>
+
+    <div class="card boundary">
+      <h3>Product boundary: not decided here</h3>
+      <ul>
+        <li><b>Rights.</b> Usage windows, territories and talent terms are not in the video. They need the rights record held against the asset.</li>
+        <li><b>Claim substantiation.</b> The model can find a claim. Whether there is evidence for it is a person's decision.</li>
+        <li><b>Final editorial approval.</b> Detections are evidence for a reviewer, not a clearance.</li>
+      </ul>
+    </div>
+  </section>
+</main>
+</body>
+</html>

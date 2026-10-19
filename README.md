@@ -134,3 +134,33 @@ in the video.
 
 On static hosting (Netlify) the v2 page still runs the metadata checks and says which checks
 need the server.
+
+## v3: fixes found by testing real ads
+
+v2 was built and scored against synthetic test ads with known ground truth, and scored 14/14
+there. Running it on two real, public-domain ads (a 2026 Navy-Marine Corps Relief Society spot and
+a 2020 California COVID-19 PSA, both US government works) found problems the synthetic ads could
+not show. `/v3/verify.html` fixes them and runs alongside v2, which is left unchanged.
+`/v3/findings.html` shows each problem in v2 next to the v3 result.
+
+| Found on real ads | v3 change |
+| --- | --- |
+| Rules that cannot apply still failed: every ad was checked for an alcohol responsibility line and a fictional brand's logo | Rules carry `applies_when` (category, brand) and the ad's brand and category are declared; a rule for another category or brand is N/A |
+| A missing item failed every rule about it (present, hold time, size, position) | Only the "present" rule judges absence; timing, size and position rules are N/A when there is nothing to measure |
+| Name captions, subtitles, an opening logo card and an end-card logo were missed | OCR (Apple Vision, via `tools/ocr_boxes.js`) reads every changed frame; frame selection keeps the frames where new text appears; the model gets each frame's OCR lines and a `super` type for editor-added text |
+| Text the model did report was hidden: the timeline drew only four types | The timeline draws every type, including supers and other text |
+| One logo came back as seven overlapping pieces | Intervals of the same item are joined when they overlap or touch |
+| Text boxes on a scene cut were the whole search window, not the text | Boxes come from OCR; a position only the model estimated is REVIEW, not PASS or FAIL |
+
+What is still not solved, and the page says so:
+
+- Detection is not repeatable run to run: the same file can return slightly different items.
+- Text height is measured reliably only on a flat background. For supers over footage a small
+  measurement becomes REVIEW, not FAIL.
+- OCR needs macOS. Elsewhere the boxes fall back to the model's estimate, which v3 marks as REVIEW.
+
+```bash
+python3 server.py                          # serves /, /v2/verify.html and /v3/verify.html
+python3 tools/eval_detection.py --v3       # score v3 detection against the synthetic ground truth
+python3 tools/capture.py --help            # screenshot a page for a test ad (used for the evidence)
+```

@@ -3,7 +3,8 @@
 Results are written to the server cache, so the UI returns them instantly afterwards
 (labelled as cached, with the analysis time).
 
-Usage: python3 tools/eval_detection.py [--force]
+Usage: python3 tools/eval_detection.py [--force] [--v3]
+  --v3  score the v3 pipeline (OCR-assisted, cached separately) instead of v2
 """
 import hashlib
 import json
@@ -18,10 +19,15 @@ FIXTURES = os.path.join(server.ROOT, "fixtures")
 NAMES = ["ad_pass", "ad_short_disclaimer", "ad_unsafe_area", "ad_small_disclaimer", "ad_claim_no_logo", "ad_broadcast_slate"]
 
 
-def analyse(name, force):
+def analyse(name, force, v3=False):
     path = os.path.join(FIXTURES, name + ".mp4")
     data = open(path, "rb").read()
     digest = hashlib.sha256(data).hexdigest()
+    if v3:
+        cached = os.path.join(server.CACHE, f"{digest}.{server.PIPELINE_V3}.json")
+        if force and os.path.exists(cached):
+            os.remove(cached)
+        return name, server.analyze_v3(path, digest, name + ".mp4")
     cached = os.path.join(server.CACHE, digest + ".json")
     if os.path.exists(cached) and not force:
         return name, json.load(open(cached))
@@ -74,12 +80,13 @@ def score(name, result):
 
 if __name__ == "__main__":
     force = "--force" in sys.argv
+    v3 = "--v3" in sys.argv
     # Sequential: one video uses most of a 30k tokens-per-minute budget.
     import time
     results = []
     for i, n in enumerate(NAMES):
         t = time.time()
-        results.append(analyse(n, force))
+        results.append(analyse(n, force, v3))
         print(f"{n} done in {time.time() - t:.0f}s", flush=True)
         if i < len(NAMES) - 1 and time.time() - t > 5:
             time.sleep(35)
