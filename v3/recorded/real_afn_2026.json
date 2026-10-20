@@ -1,0 +1,447 @@
+{
+ "id": "real_afn_2026",
+ "kind": "real",
+ "asset": {
+  "filename": "real_afn_2026.mp4",
+  "file_size": 30994457,
+  "container": "mp4",
+  "video_codec": "h264",
+  "width": 1920,
+  "height": 1080,
+  "resolution": "1920x1080",
+  "aspect_ratio": 1.7778,
+  "frame_rate": 29.97,
+  "frame_rate_mode": "constant",
+  "scan_type": "progressive",
+  "video_bitrate": 3929320,
+  "duration": 60.027,
+  "audio_codec": "aac",
+  "audio_bitrate": 192000,
+  "audio_sample_rate": 48000,
+  "audio_channels": 2,
+  "pixel_format": "yuv420p",
+  "colour_space": null,
+  "operational_pattern": null,
+  "start_timecode": null,
+  "bits_per_sample": null,
+  "integrated_loudness": null,
+  "true_peak": null
+ },
+ "analysis": {
+  "sha256": "0c4cad4b83456a097383c7c21128dd3dc67fc15981e3cd0dc11553a8a4ccae0c",
+  "filename": "real_afn_2026.mp4",
+  "analysed_at": "2026-10-19T16:02:25+00:00",
+  "signal": {
+   "integrated_loudness": -24.8,
+   "true_peak": -10.6,
+   "black_segments": [
+    {
+     "start": 0.0,
+     "end": 0.5005
+    }
+   ],
+   "method": "ffmpeg ebur128 (EBU R128 / ITU-R BS.1770) + blackdetect"
+  },
+  "content": {
+   "model": "gpt-4o",
+   "transcribe_model": "whisper-1",
+   "sample_fps": 4,
+   "pipeline": "v3",
+   "frames": 24,
+   "transcript": [
+    {
+     "start": 0.0,
+     "end": 10.0,
+     "text": "Military life can be filled with unexpected challenges."
+    },
+    {
+     "start": 10.0,
+     "end": 14.44,
+     "text": "For more than 120 years, the Navy Marine Corps Relief Society has been a lifeline, providing"
+    },
+    {
+     "start": 14.44,
+     "end": 18.0,
+     "text": "assistance to Marines, Sailors, and their family members."
+    },
+    {
+     "start": 18.0,
+     "end": 25.44,
+     "text": "In 2025, the Navy Marine Corps Relief Society provided $47 million in support to 211,000"
+    },
+    {
+     "start": 25.44,
+     "end": 26.44,
+     "text": "Marines and Sailors."
+    },
+    {
+     "start": 26.44,
+     "end": 31.44,
+     "text": "None of this would be possible without your generous donations."
+    },
+    {
+     "start": 31.44,
+     "end": 36.0,
+     "text": "From living expenses, transportation needs, operating thrift stores, to helping new and"
+    },
+    {
+     "start": 36.0,
+     "end": 40.32,
+     "text": "expecting parents with Okinawa's first-of-its-kind visiting nurse, the Navy Marine Corps Relief"
+    },
+    {
+     "start": 40.32,
+     "end": 46.32,
+     "text": "Society is there when you need it most."
+    },
+    {
+     "start": 46.32,
+     "end": 50.84,
+     "text": "The 2026 Active Duty Fund Drive runs from 1 March to 30 April."
+    },
+    {
+     "start": 50.84,
+     "end": 54.04,
+     "text": "Always remember, the Navy Marine Corps Relief Society is here to help you handle life's"
+    },
+    {
+     "start": 54.04,
+     "end": 57.08,
+     "text": "obstacles so you can stay focused on our critical mission."
+    },
+    {
+     "start": 57.08,
+     "end": 59.0,
+     "text": "Thank you and Semper Fidelis!"
+    }
+   ],
+   "seconds": 28.2,
+   "detections": [
+    {
+     "type": "logo",
+     "text": "NAVY-MARINE CORPS RELIEF SOCIETY",
+     "source": "on_screen",
+     "start": 2.75,
+     "end": 11.25,
+     "confidence": 0.95,
+     "box": {
+      "top": 0.43,
+      "left": 0.15,
+      "bottom": 0.67,
+      "right": 0.85
+     },
+     "box_method": "model estimate",
+     "merged_from": 2
+    },
+    {
+     "type": "other_text",
+     "text": "NAVY RELIEF SOCIETY",
+     "source": "on_screen",
+     "start": 7.75,
+     "end": 14.75,
+     "confidence": 0.8,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": -0.0,
+      "left": 0.178,
+      "bottom": 0.18,
+      "right": 0.503
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 11.25,
+     "line_boxes": [
+      {
+       "top": -0.0,
+       "left": 0.178,
+       "bottom": 0.078,
+       "right": 0.503
+      },
+      {
+       "top": 0.105,
+       "left": 0.239,
+       "bottom": 0.18,
+       "right": 0.444
+      }
+     ],
+     "merged_from": 2
+    },
+    {
+     "type": "super",
+     "text": "AJGEN BRIAN WOLFORD",
+     "source": "on_screen",
+     "start": 8.75,
+     "end": 11.5,
+     "confidence": 0.85,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.758,
+      "left": 0.145,
+      "bottom": 0.824,
+      "right": 0.69
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 8.75,
+     "line_boxes": [
+      {
+       "top": 0.758,
+       "left": 0.145,
+       "bottom": 0.824,
+       "right": 0.69
+      }
+     ],
+     "x_height_lines": 53,
+     "x_height_samples": [
+      53
+     ]
+    },
+    {
+     "type": "logo",
+     "text": "NAVY-MARINE CORPS RELIEF SOCIETY",
+     "source": "on_screen",
+     "start": 19.25,
+     "end": 28.5,
+     "confidence": 0.9,
+     "box": {
+      "top": 0.27,
+      "left": 0.05,
+      "bottom": 0.37,
+      "right": 0.45
+     },
+     "box_method": "model estimate"
+    },
+    {
+     "type": "super",
+     "text": "SGTMAJ JORGE ORTIZ",
+     "source": "on_screen",
+     "start": 20.0,
+     "end": 22.75,
+     "confidence": 0.85,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.77,
+      "left": 0.418,
+      "bottom": 0.875,
+      "right": 0.905
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 20.5,
+     "line_boxes": [
+      {
+       "top": 0.77,
+       "left": 0.418,
+       "bottom": 0.832,
+       "right": 0.905
+      },
+      {
+       "top": 0.837,
+       "left": 0.421,
+       "bottom": 0.875,
+       "right": 0.562
+      }
+     ],
+     "x_height_lines": 53,
+     "x_height_samples": [
+      20,
+      53
+     ]
+    },
+    {
+     "type": "logo",
+     "text": "NAVY-MARINE CORPS RELIEF SOCIETY",
+     "source": "on_screen",
+     "start": 31.0,
+     "end": 38.0,
+     "confidence": 0.9,
+     "box": {
+      "top": 0.27,
+      "left": 0.05,
+      "bottom": 0.37,
+      "right": 0.45
+     },
+     "box_method": "model estimate"
+    },
+    {
+     "type": "super",
+     "text": "RIZZO, DIRECTOR, OKINAWA OFFICE",
+     "source": "on_screen",
+     "start": 32.0,
+     "end": 34.75,
+     "confidence": 0.85,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.762,
+      "left": 0.158,
+      "bottom": 0.883,
+      "right": 0.403
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 32.0,
+     "line_boxes": [
+      {
+       "top": 0.762,
+       "left": 0.18,
+       "bottom": 0.824,
+       "right": 0.347
+      },
+      {
+       "top": 0.816,
+       "left": 0.158,
+       "bottom": 0.883,
+       "right": 0.403
+      }
+     ],
+     "x_height_lines": 72,
+     "x_height_samples": [
+      20,
+      72
+     ]
+    },
+    {
+     "type": "claim",
+     "text": "Okinawa's first-of-its-kind visiting nurse",
+     "source": "spoken",
+     "start": 36.0,
+     "end": 40.32,
+     "confidence": 0.95
+    },
+    {
+     "type": "super",
+     "text": "DHA Global Service Center: 800-600-9332 https://gsc.health.mil",
+     "source": "on_screen",
+     "start": 38.0,
+     "end": 38.75,
+     "confidence": 0.9,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.502,
+      "left": 0.083,
+      "bottom": 0.578,
+      "right": 0.194
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 38.75,
+     "line_boxes": [
+      {
+       "top": 0.502,
+       "left": 0.083,
+       "bottom": 0.537,
+       "right": 0.194
+      },
+      {
+       "top": 0.527,
+       "left": 0.136,
+       "bottom": 0.551,
+       "right": 0.178
+      },
+      {
+       "top": 0.555,
+       "left": 0.105,
+       "bottom": 0.578,
+       "right": 0.169
+      }
+     ]
+    },
+    {
+     "type": "other_text",
+     "text": "OFFICE HOURS",
+     "source": "on_screen",
+     "start": 41.0,
+     "end": 45.75,
+     "confidence": 0.8,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.527,
+      "left": 0.516,
+      "bottom": 0.562,
+      "right": 0.642
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 43.0,
+     "line_boxes": [
+      {
+       "top": 0.527,
+       "left": 0.516,
+       "bottom": 0.562,
+       "right": 0.642
+      }
+     ]
+    },
+    {
+     "type": "other_text",
+     "text": "OUR OFFICE IS NOW OPEN! READY TO SERVE IN PERSON",
+     "source": "on_screen",
+     "start": 41.0,
+     "end": 42.5,
+     "confidence": 0.85,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.496,
+      "left": 0.347,
+      "bottom": 0.859,
+      "right": 0.659
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 41.0,
+     "line_boxes": [
+      {
+       "top": 0.496,
+       "left": 0.347,
+       "bottom": 0.566,
+       "right": 0.659
+      },
+      {
+       "top": 0.586,
+       "left": 0.354,
+       "bottom": 0.66,
+       "right": 0.659
+      },
+      {
+       "top": 0.699,
+       "left": 0.356,
+       "bottom": 0.758,
+       "right": 0.657
+      },
+      {
+       "top": 0.777,
+       "left": 0.354,
+       "bottom": 0.859,
+       "right": 0.651
+      }
+     ]
+    },
+    {
+     "type": "logo",
+     "text": "NAVY-MARINE CORPS RELIEF SOCIETY",
+     "source": "on_screen",
+     "start": 45.75,
+     "end": 59.5,
+     "confidence": 0.9,
+     "box": {
+      "top": 0.27,
+      "left": 0.05,
+      "bottom": 0.37,
+      "right": 0.45
+     },
+     "box_method": "model estimate"
+    }
+   ]
+  }
+ },
+ "declared": {
+  "brand": null,
+  "category": null
+ },
+ "activeDuration": 60,
+ "meta": {
+  "title": "Navy-Marine Corps Relief Society, AFN commercial (2026)",
+  "by": "US Marine Corps",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Navy-Marine_Corps_Relief_Society;_AFN_Commercial_2026_(998299).webm",
+  "licence": "US government work, public domain (via Wikimedia Commons)",
+  "note": "Converted from WebM/OGV to H.264 MP4 for this tool (picture, sound and timing unchanged).",
+  "recorded_at": "2026-10-19T16:02:25+00:00",
+  "pipeline": "server.py /api/v3/analyze: ffmpeg signal + OCR + gpt-4o on 24 frames + whisper-1",
+  "sha256": "0c4cad4b83456a097383c7c21128dd3dc67fc15981e3cd0dc11553a8a4ccae0c",
+  "preview": "real_afn_2026.jpg",
+  "preview_at": 10.0
+ }
+}

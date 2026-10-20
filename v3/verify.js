@@ -11,6 +11,12 @@ const FIXTURES = [
   ["ad_claim_no_logo", "Claims, no logo"],
   ["ad_broadcast_slate", "Broadcast slate"],
 ];
+// Runs recorded with the local server (v3/recorded/<id>.json), replayed through the same engine without a server.
+const RECORDED_REAL = [
+  ["real_afn_2026", "Navy-Marine Corps Relief Society, 2026 · 60 s"],
+  ["real_ca_covid_2020", "California COVID-19 PSA, 2020 · 30 s"],
+];
+const RECORDED_TEST = FIXTURES;
 const LAYERS = ["technical", "brand", "editorial", "rights"];
 const LAYER_NAMES = { technical: "Technical", brand: "Brand", editorial: "Editorial", rights: "Rights" };
 
@@ -201,8 +207,18 @@ function render() {
   $("asset-title").textContent = a.filename;
   $("asset-sub").textContent = [a.container?.toUpperCase(), a.resolution, a.frame_rate && `${a.frame_rate} fps`, a.duration && `${a.duration.toFixed(2)} s`,
     an.signal?.integrated_loudness != null && `${an.signal.integrated_loudness} LUFS`, an.signal?.true_peak != null && `${an.signal.true_peak} dBTP`].filter(Boolean).join(" · ");
-  $("origin").textContent = c.error ? `Content analysis unavailable: ${c.error}`
+  const rec = verdict.recorded;
+  $("origin").classList.toggle("replay", Boolean(rec));
+  $("origin").textContent = rec ? `Recorded ${fmtDate(rec.recorded_at)} with the local server, replayed here · OCR + ${c.model} on ${c.frames ?? "?"} frames + ${c.transcribe_model || "transcript"}`
+    : c.error ? `Content analysis unavailable: ${c.error}`
     : `${an.cached ? "Cached result from " + an.analysed_at.replace("T", " ").replace("+00:00", " UTC") : "Live analysis"} · OCR + ${c.model} on ${c.frames ?? "?"} frames + ${c.transcribe_model || "transcript"}`;
+  $("recorded-info").hidden = !rec;
+  $("recorded-info").innerHTML = !rec ? "" : `${rec.preview ? `<img src="/v3/recorded/${esc(rec.preview)}" alt="Frame at ${esc(rec.preview_at)} s of ${esc(rec.title)}">` : ""}<div>
+    <p><b>${esc(rec.title)}</b>${rec.by ? ` · ${esc(rec.by)}` : ""}</p>
+    <p>${esc(rec.licence)}.${rec.source_url ? ` <a href="${esc(rec.source_url)}" target="_blank" rel="noreferrer">Source</a>` : ""}${rec.note ? ` ${esc(rec.note)}` : ""}</p>
+    <p>Recorded ${esc(fmtDate(rec.recorded_at))} with the local server (${esc(rec.pipeline)}). The measurements and detections are that run's; the rules and verdicts are computed now, in this browser.</p>
+    <p>Declared: ${verdict.declared.brand ? `brand ${esc(verdict.declared.brand)}` : "no brand"}, ${verdict.declared.category ? `category ${esc(verdict.declared.category)}` : "category other"} · commercial length ${esc(rec.activeDuration)} s · file SHA-256 ${esc(rec.sha256.slice(0, 12))}…</p>
+  </div>`;
   $("content-basis").innerHTML = `<b>Commercial starts at ${verdict.content.seconds.toFixed(2)}s.</b> Basis: ${esc(verdict.content.basis)}.`;
   timeline();
   $("rows").innerHTML = verdict.results.map((r) => `<tr class="row ${r.id === selected ? "sel" : ""}" data-id="${r.id}">
@@ -213,10 +229,46 @@ function render() {
   detail();
 }
 
+// ---------- recorded runs ----------
+const fmtDate = (iso) => String(iso || "").replace("T", " ").replace(/:\d\d\+00:00$/, " UTC");
+
+async function replay(id) {
+  $("error").hidden = true; $("steps").hidden = true;
+  try {
+    const res = await fetch(`/v3/recorded/${id}.json`);
+    if (!res.ok) throw new Error(`Could not load the recorded run for ${id}.`);
+    const rec = await res.json();
+    const t = rec.meta.truth ? await fetch(rec.meta.truth).then((r) => (r.ok ? r.json() : null)).catch(() => null) : null;
+    const { brand, destinations } = await rulesReady;
+    // Mirror the form so the page shows what this run was judged with.
+    $("active").value = rec.activeDuration ?? "";
+    $("brand").value = rec.declared.brand || ""; $("category").value = rec.declared.category || "";
+    $("file-name").textContent = `${rec.asset.filename} (recorded run)`;
+    $("file-meta").textContent = `${(rec.asset.file_size / 1048576).toFixed(1)} MB · not uploaded`;
+    file = null; truth = t;
+    verdict = Engine.verify({ asset: rec.asset, analysis: rec.analysis, destinations, brand, activeDuration: rec.activeDuration, declared: rec.declared });
+    verdict.analysis = rec.analysis;
+    verdict.recorded = { ...rec.meta, activeDuration: rec.activeDuration };
+    render();
+  } catch (e) {
+    $("error").textContent = e.message; $("error").hidden = false;
+  }
+}
+
+function recordedButtons(el, list) {
+  $(el).innerHTML = list.map(([id, label]) => `<button type="button" data-id="${id}">${esc(label)}</button>`).join("");
+}
+recordedButtons("recorded-real", RECORDED_REAL);
+recordedButtons("recorded-test", RECORDED_TEST);
+document.querySelectorAll(".recorded button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("#fixtures button, .recorded button").forEach((x) => x.classList.toggle("on", x === b));
+  replay(b.dataset.id);
+}));
+
 // ---------- wiring ----------
 $("fixtures").innerHTML = FIXTURES.map(([id, label]) => `<button type="button" data-id="${id}">${label}</button>`).join("");
 document.querySelectorAll("#fixtures button").forEach((b) => b.addEventListener("click", async () => {
-  document.querySelectorAll("#fixtures button").forEach((x) => x.classList.toggle("on", x === b));
+  document.querySelectorAll("#fixtures button, .recorded button").forEach((x) => x.classList.toggle("on", x === b));
   const id = b.dataset.id;
   const video = await fetch(`/fixtures/${id}.mp4`);
   if (!video.ok) { $("error").textContent = "Test ads are generated locally (python3 tools/make_fixtures.py) and are not published with the site."; $("error").hidden = false; return; }
@@ -229,7 +281,7 @@ document.querySelectorAll("#fixtures button").forEach((b) => b.addEventListener(
 }));
 $("drop").addEventListener("click", (e) => { if (!e.target.closest("button,input,label")) $("file").click(); });
 $("run").addEventListener("click", run);
-$("file").addEventListener("change", (e) => { const f = e.target.files?.[0]; if (f) { document.querySelectorAll("#fixtures button").forEach((x) => x.classList.remove("on")); choose(f); } });
+$("file").addEventListener("change", (e) => { const f = e.target.files?.[0]; if (f) { document.querySelectorAll("#fixtures button, .recorded button").forEach((x) => x.classList.remove("on")); choose(f); } });
 $("drop").addEventListener("dragover", (e) => { e.preventDefault(); $("drop").classList.add("dragging"); });
 $("drop").addEventListener("dragleave", () => $("drop").classList.remove("dragging"));
 $("drop").addEventListener("drop", (e) => { e.preventDefault(); $("drop").classList.remove("dragging"); const f = e.dataTransfer.files?.[0]; if (f) choose(f); });

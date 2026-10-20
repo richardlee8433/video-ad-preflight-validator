@@ -1,0 +1,562 @@
+{
+ "id": "real_ca_covid_2020",
+ "kind": "real",
+ "asset": {
+  "filename": "real_ca_covid_2020.mp4",
+  "file_size": 13778445,
+  "container": "mp4",
+  "video_codec": "h264",
+  "width": 1280,
+  "height": 720,
+  "resolution": "1280x720",
+  "aspect_ratio": 1.7778,
+  "frame_rate": 23.81,
+  "frame_rate_mode": "variable",
+  "scan_type": "progressive",
+  "video_bitrate": 3467050,
+  "duration": 30.072,
+  "audio_codec": "aac",
+  "audio_bitrate": 192000,
+  "audio_sample_rate": 44100,
+  "audio_channels": 2,
+  "pixel_format": "yuv420p",
+  "colour_space": null,
+  "operational_pattern": null,
+  "start_timecode": null,
+  "bits_per_sample": null,
+  "integrated_loudness": null,
+  "true_peak": null
+ },
+ "analysis": {
+  "sha256": "a26da814906c4ae77a062dee547bd207c0cce759f9ec7090826d760832aa4d0c",
+  "filename": "real_ca_covid_2020.mp4",
+  "analysed_at": "2026-10-19T16:03:01+00:00",
+  "signal": {
+   "integrated_loudness": -26.6,
+   "true_peak": -12.8,
+   "black_segments": [],
+   "method": "ffmpeg ebur128 (EBU R128 / ITU-R BS.1770) + blackdetect"
+  },
+  "content": {
+   "model": "gpt-4o",
+   "transcribe_model": "whisper-1",
+   "sample_fps": 4,
+   "pipeline": "v3",
+   "frames": 24,
+   "transcript": [
+    {
+     "start": 0.0,
+     "end": 5.3,
+     "text": "extrañamos esos momentos especiales con nuestra familia, la libertad de"
+    },
+    {
+     "start": 5.3,
+     "end": 9.58,
+     "text": "compartir con nuestra comunidad. Queremos que los niños puedan regresar a la"
+    },
+    {
+     "start": 9.58,
+     "end": 15.24,
+     "text": "escuela y tener estabilidad en nuestros empleos. Con responsabilidad podemos"
+    },
+    {
+     "start": 15.24,
+     "end": 20.32,
+     "text": "recobrar lo perdido. Hagamos lo correcto, mantengamos seis pies de distancia,"
+    },
+    {
+     "start": 20.32,
+     "end": 25.44,
+     "text": "lavémonos las manos con frecuencia y usemos mascarilla todas las veces que"
+    },
+    {
+     "start": 25.44,
+     "end": 31.84,
+     "text": "salimos de casa. Juntos podemos luchar contra el COVID-19."
+    }
+   ],
+   "seconds": 20.2,
+   "detections": [
+    {
+     "type": "super",
+     "text": "Extrañamos esos momentos especiales...",
+     "source": "on_screen",
+     "start": 0.0,
+     "end": 2.75,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.822,
+      "left": 0.273,
+      "bottom": 0.973,
+      "right": 0.73
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 0.0,
+     "line_boxes": [
+      {
+       "top": 0.822,
+       "left": 0.337,
+       "bottom": 0.904,
+       "right": 0.662
+      },
+      {
+       "top": 0.891,
+       "left": 0.273,
+       "bottom": 0.973,
+       "right": 0.73
+      }
+     ],
+     "x_height_lines": 41,
+     "x_height_samples": [
+      40,
+      41
+     ]
+    },
+    {
+     "type": "super",
+     "text": "con nuestra familia,",
+     "source": "on_screen",
+     "start": 3.0,
+     "end": 4.25,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.815,
+      "left": 0.312,
+      "bottom": 0.912,
+      "right": 0.697
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 3.0,
+     "line_boxes": [
+      {
+       "top": 0.815,
+       "left": 0.312,
+       "bottom": 0.912,
+       "right": 0.697
+      }
+     ],
+     "x_height_lines": 41,
+     "x_height_samples": [
+      41
+     ]
+    },
+    {
+     "type": "super",
+     "text": "la libertad de compartir con nuestra comunidad.",
+     "source": "on_screen",
+     "start": 4.75,
+     "end": 7.0,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.828,
+      "left": 0.27,
+      "bottom": 0.973,
+      "right": 0.743
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 4.75,
+     "line_boxes": [
+      {
+       "top": 0.828,
+       "left": 0.273,
+       "bottom": 0.902,
+       "right": 0.736
+      },
+      {
+       "top": 0.896,
+       "left": 0.27,
+       "bottom": 0.973,
+       "right": 0.743
+      }
+     ],
+     "x_height_lines": 40,
+     "x_height_samples": [
+      40,
+      40
+     ]
+    },
+    {
+     "type": "super",
+     "text": "Queremos que los niños puedan regresar a la escuela",
+     "source": "on_screen",
+     "start": 7.5,
+     "end": 10.0,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.832,
+      "left": 0.212,
+      "bottom": 0.993,
+      "right": 0.779
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 7.5,
+     "line_boxes": [
+      {
+       "top": 0.832,
+       "left": 0.27,
+       "bottom": 0.902,
+       "right": 0.73
+      },
+      {
+       "top": 0.91,
+       "left": 0.212,
+       "bottom": 0.993,
+       "right": 0.779
+      }
+     ],
+     "x_height_lines": 61,
+     "x_height_samples": [
+      55,
+      61
+     ]
+    },
+    {
+     "type": "super",
+     "text": "y tener estabilidad en nuestros empleos.",
+     "source": "on_screen",
+     "start": 10.5,
+     "end": 13.25,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.83,
+      "left": 0.288,
+      "bottom": 0.977,
+      "right": 0.708
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 11.75,
+     "line_boxes": [
+      {
+       "top": 0.83,
+       "left": 0.288,
+       "bottom": 0.911,
+       "right": 0.708
+      },
+      {
+       "top": 0.906,
+       "left": 0.327,
+       "bottom": 0.977,
+       "right": 0.675
+      }
+     ],
+     "x_height_lines": 43,
+     "x_height_samples": [
+      42,
+      43
+     ]
+    },
+    {
+     "type": "super",
+     "text": "Con responsabilidad podemos recobrar lo perdido.",
+     "source": "on_screen",
+     "start": 13.75,
+     "end": 16.5,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.828,
+      "left": 0.218,
+      "bottom": 0.977,
+      "right": 0.787
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 14.75,
+     "line_boxes": [
+      {
+       "top": 0.828,
+       "left": 0.308,
+       "bottom": 0.902,
+       "right": 0.695
+      },
+      {
+       "top": 0.887,
+       "left": 0.218,
+       "bottom": 0.977,
+       "right": 0.787
+      }
+     ],
+     "x_height_lines": 43,
+     "x_height_samples": [
+      41,
+      43
+     ]
+    },
+    {
+     "type": "super",
+     "text": "Hagamos lo correcto.",
+     "source": "on_screen",
+     "start": 16.75,
+     "end": 18.0,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.83,
+      "left": 0.292,
+      "bottom": 0.911,
+      "right": 0.712
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 17.0,
+     "line_boxes": [
+      {
+       "top": 0.83,
+       "left": 0.292,
+       "bottom": 0.911,
+       "right": 0.712
+      }
+     ],
+     "x_height_lines": 22,
+     "x_height_samples": [
+      22
+     ]
+    },
+    {
+     "type": "super",
+     "text": "Mantengamos seis pies de distancia.",
+     "source": "on_screen",
+     "start": 18.25,
+     "end": 20.25,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.828,
+      "left": 0.277,
+      "bottom": 0.977,
+      "right": 0.725
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 18.25,
+     "line_boxes": [
+      {
+       "top": 0.828,
+       "left": 0.277,
+       "bottom": 0.902,
+       "right": 0.725
+      },
+      {
+       "top": 0.898,
+       "left": 0.369,
+       "bottom": 0.977,
+       "right": 0.622
+      }
+     ],
+     "x_height_lines": 23,
+     "x_height_samples": [
+      22,
+      23
+     ]
+    },
+    {
+     "type": "super",
+     "text": "Lavémonos las manos con frecuencia.",
+     "source": "on_screen",
+     "start": 20.75,
+     "end": 22.75,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.828,
+      "left": 0.292,
+      "bottom": 0.973,
+      "right": 0.716
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 21.75,
+     "line_boxes": [
+      {
+       "top": 0.828,
+       "left": 0.292,
+       "bottom": 0.891,
+       "right": 0.716
+      },
+      {
+       "top": 0.895,
+       "left": 0.347,
+       "bottom": 0.973,
+       "right": 0.651
+      }
+     ],
+     "x_height_lines": 42,
+     "x_height_samples": [
+      40,
+      42
+     ]
+    },
+    {
+     "type": "super",
+     "text": "Y usemos mascarilla todas las veces que salimos de casa.",
+     "source": "on_screen",
+     "start": 22.75,
+     "end": 26.25,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.828,
+      "left": 0.222,
+      "bottom": 0.977,
+      "right": 0.782
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 22.75,
+     "line_boxes": [
+      {
+       "top": 0.828,
+       "left": 0.222,
+       "bottom": 0.891,
+       "right": 0.782
+      },
+      {
+       "top": 0.902,
+       "left": 0.24,
+       "bottom": 0.977,
+       "right": 0.763
+      }
+     ],
+     "x_height_lines": 41,
+     "x_height_samples": [
+      40,
+      41
+     ]
+    },
+    {
+     "type": "super",
+     "text": "Juntos, podemos luchar contra el COVID-19.",
+     "source": "on_screen",
+     "start": 26.75,
+     "end": 30.07,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.711,
+      "left": 0.275,
+      "bottom": 0.867,
+      "right": 0.725
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 27.75,
+     "line_boxes": [
+      {
+       "top": 0.711,
+       "left": 0.275,
+       "bottom": 0.785,
+       "right": 0.725
+      },
+      {
+       "top": 0.785,
+       "left": 0.313,
+       "bottom": 0.867,
+       "right": 0.688
+      }
+     ],
+     "x_height_lines": 55,
+     "x_height_samples": [
+      41,
+      55
+     ]
+    },
+    {
+     "type": "super",
+     "text": "covid19.ca.gov/es",
+     "source": "on_screen",
+     "start": 27.25,
+     "end": 30.07,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.852,
+      "left": 0.051,
+      "bottom": 0.91,
+      "right": 0.299
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 27.75,
+     "line_boxes": [
+      {
+       "top": 0.852,
+       "left": 0.051,
+       "bottom": 0.91,
+       "right": 0.299
+      }
+     ],
+     "x_height_lines": 30,
+     "x_height_samples": [
+      30
+     ]
+    },
+    {
+     "type": "logo",
+     "text": "CALIFORNIA ALL",
+     "source": "on_screen",
+     "start": 27.75,
+     "end": 30.07,
+     "confidence": 0.95,
+     "box": {
+      "top": 0.75,
+      "left": 0.0,
+      "bottom": 0.87,
+      "right": 1.0
+     },
+     "box_method": "model estimate"
+    },
+    {
+     "type": "super",
+     "text": "Haz tu parte. Reduce la propagación.",
+     "source": "on_screen",
+     "start": 27.75,
+     "end": 30.07,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.367,
+      "left": 0.048,
+      "bottom": 0.578,
+      "right": 0.549
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 28.75,
+     "line_boxes": [
+      {
+       "top": 0.367,
+       "left": 0.05,
+       "bottom": 0.5,
+       "right": 0.469
+      },
+      {
+       "top": 0.496,
+       "left": 0.048,
+       "bottom": 0.578,
+       "right": 0.549
+      }
+     ],
+     "x_height_lines": 69,
+     "x_height_samples": [
+      18,
+      69
+     ]
+    }
+   ]
+  }
+ },
+ "declared": {
+  "brand": null,
+  "category": null
+ },
+ "activeDuration": 30,
+ "meta": {
+  "title": "Your Action Saves Lives, Spanish (2020)",
+  "by": "Office of the Governor of California",
+  "source_url": "https://commons.wikimedia.org/wiki/File:Your_Action_Saves_Lives_-_Spanish_commercial_-_2020-08-02.ogv",
+  "licence": "US government work, public domain (via Wikimedia Commons)",
+  "note": "Converted from WebM/OGV to H.264 MP4 for this tool (picture, sound and timing unchanged).",
+  "recorded_at": "2026-10-19T16:03:01+00:00",
+  "pipeline": "server.py /api/v3/analyze: ffmpeg signal + OCR + gpt-4o on 24 frames + whisper-1",
+  "sha256": "a26da814906c4ae77a062dee547bd207c0cce759f9ec7090826d760832aa4d0c",
+  "preview": "real_ca_covid_2020.jpg",
+  "preview_at": 29.0
+ }
+}

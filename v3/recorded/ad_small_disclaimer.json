@@ -1,0 +1,205 @@
+{
+ "id": "ad_small_disclaimer",
+ "kind": "synthetic",
+ "asset": {
+  "filename": "ad_small_disclaimer.mp4",
+  "file_size": 68147421,
+  "container": "mp4",
+  "video_codec": "h264",
+  "width": 1920,
+  "height": 1080,
+  "resolution": "1920x1080",
+  "aspect_ratio": 1.7778,
+  "frame_rate": 25,
+  "frame_rate_mode": "constant",
+  "scan_type": "progressive",
+  "video_bitrate": 18000000,
+  "duration": 30,
+  "audio_codec": "aac",
+  "audio_bitrate": 196000,
+  "audio_sample_rate": 48000,
+  "audio_channels": 2,
+  "pixel_format": "yuv420p",
+  "colour_space": null,
+  "operational_pattern": null,
+  "start_timecode": null,
+  "bits_per_sample": null,
+  "integrated_loudness": null,
+  "true_peak": null
+ },
+ "analysis": {
+  "sha256": "e8a62de1cb68ca4f274704e948da8980efefcf1a0f861d284e194b92b59ee495",
+  "filename": "ad_small_disclaimer.mp4",
+  "analysed_at": "2026-10-19T16:05:42+00:00",
+  "signal": {
+   "integrated_loudness": -22.8,
+   "true_peak": -7.2,
+   "black_segments": [],
+   "method": "ffmpeg ebur128 (EBU R128 / ITU-R BS.1770) + blackdetect"
+  },
+  "content": {
+   "model": "gpt-4o",
+   "transcribe_model": "whisper-1",
+   "sample_fps": 4,
+   "pipeline": "v3",
+   "frames": 15,
+   "transcript": [
+    {
+     "start": 0.0,
+     "end": 7.0,
+     "text": "The long evenings are back, north light, brood slow, for the people you stay out with."
+    },
+    {
+     "start": 30.0,
+     "end": 35.0,
+     "text": "The long evenings are back, north light, brood slow, for the people you stay out with."
+    }
+   ],
+   "seconds": 8.3,
+   "detections": [
+    {
+     "type": "super",
+     "text": "The long evenings are back.",
+     "source": "on_screen",
+     "start": 2.0,
+     "end": 9.0,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.461,
+      "left": 0.204,
+      "bottom": 0.543,
+      "right": 0.798
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 5.0,
+     "line_boxes": [
+      {
+       "top": 0.461,
+       "left": 0.204,
+       "bottom": 0.543,
+       "right": 0.798
+      }
+     ],
+     "x_height_lines": 44,
+     "x_height_samples": [
+      44
+     ]
+    },
+    {
+     "type": "other_text",
+     "text": "Brewed slow in Kilkenny since 1921.",
+     "source": "on_screen",
+     "start": 10.0,
+     "end": 17.0,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.465,
+      "left": 0.176,
+      "bottom": 0.535,
+      "right": 0.831
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 13.0,
+     "line_boxes": [
+      {
+       "top": 0.465,
+       "left": 0.176,
+       "bottom": 0.535,
+       "right": 0.831
+      }
+     ]
+    },
+    {
+     "type": "super",
+     "text": "Made for the people you stay out with.",
+     "source": "on_screen",
+     "start": 18.0,
+     "end": 24.5,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.465,
+      "left": 0.16,
+      "bottom": 0.539,
+      "right": 0.848
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 21.0,
+     "line_boxes": [
+      {
+       "top": 0.465,
+       "left": 0.16,
+       "bottom": 0.539,
+       "right": 0.848
+      }
+     ],
+     "x_height_lines": 39,
+     "x_height_samples": [
+      39
+     ]
+    },
+    {
+     "type": "disclaimer",
+     "text": "Please enjoy Northlight responsibly. drinkaware.ie",
+     "source": "on_screen",
+     "start": 25.0,
+     "end": 30.0,
+     "confidence": 0.95,
+     "timing_method": "OCR of every changed frame",
+     "box": {
+      "top": 0.832,
+      "left": 0.268,
+      "bottom": 0.875,
+      "right": 0.73
+     },
+     "box_method": "OCR of the frame",
+     "measured_at": 25.0,
+     "line_boxes": [
+      {
+       "top": 0.832,
+       "left": 0.268,
+       "bottom": 0.875,
+       "right": 0.73
+      }
+     ],
+     "x_height_lines": 21,
+     "x_height_samples": [
+      21
+     ]
+    },
+    {
+     "type": "logo",
+     "text": "NORTHLIGHT",
+     "source": "on_screen",
+     "start": 25.0,
+     "end": 30.0,
+     "confidence": 0.95,
+     "box": {
+      "top": 0.42,
+      "left": 0.35,
+      "bottom": 0.58,
+      "right": 0.65
+     },
+     "box_method": "model estimate"
+    }
+   ]
+  }
+ },
+ "declared": {
+  "brand": "northlight",
+  "category": "alcohol"
+ },
+ "activeDuration": 30,
+ "meta": {
+  "title": "Synthetic test ad: Small disclaimer",
+  "by": "tools/make_fixtures.py (this repo)",
+  "source_url": null,
+  "licence": "Generated for this project",
+  "truth": "/fixtures/ad_small_disclaimer.truth.json",
+  "recorded_at": "2026-10-19T16:05:42+00:00",
+  "pipeline": "server.py /api/v3/analyze: ffmpeg signal + OCR + gpt-4o on 15 frames + whisper-1",
+  "sha256": "e8a62de1cb68ca4f274704e948da8980efefcf1a0f861d284e194b92b59ee495"
+ }
+}
