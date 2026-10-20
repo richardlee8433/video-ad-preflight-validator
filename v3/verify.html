@@ -31,10 +31,14 @@
       <label class="active">Category <select id="category"><option value="">Other</option><option value="alcohol">Alcohol</option></select></label>
       <button id="run" class="primary" type="button">Verify</button>
     </div>
-    <div class="samples"><span>Test ads with known ground truth:</span><div id="fixtures"></div></div>
     <div class="samples"><span>Recorded runs on real ads:</span><div id="recorded-real" class="recorded"></div></div>
-    <div class="samples"><span>Recorded runs on the test ads:</span><div id="recorded-test" class="recorded"></div></div>
     <p class="muted replay-note">Recorded runs replay an analysis made with the local server: the same rules and rule engine judge it here, in the browser, with no server and no upload.</p>
+    <details class="accuracy">
+      <summary>Accuracy check: test ads with known answers</summary>
+      <p class="muted">Six synthetic ads built with a known answer for every object, so detection can be scored (14 of 14 found). They are also the only ads that trigger the alcohol, brand and slate rules.</p>
+      <div class="samples"><span>Recorded runs:</span><div id="recorded-test" class="recorded"></div></div>
+      <div class="samples" id="fixtures-row" hidden><span>Live, on this machine:</span><div id="fixtures"></div></div>
+    </details>
     <ol id="steps" class="steps" hidden>
       <li data-step="meta">Reading file metadata in the browser</li>
       <li data-step="server">Measuring loudness and black, reading text with OCR, detecting content with the model</li>

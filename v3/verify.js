@@ -266,6 +266,8 @@ document.querySelectorAll(".recorded button").forEach((b) => b.addEventListener(
 }));
 
 // ---------- wiring ----------
+// The test ad videos are generated locally and not published, so live runs on them only work on the local server.
+$("fixtures-row").hidden = !["localhost", "127.0.0.1"].includes(location.hostname);
 $("fixtures").innerHTML = FIXTURES.map(([id, label]) => `<button type="button" data-id="${id}">${label}</button>`).join("");
 document.querySelectorAll("#fixtures button").forEach((b) => b.addEventListener("click", async () => {
   document.querySelectorAll("#fixtures button, .recorded button").forEach((x) => x.classList.toggle("on", x === b));
