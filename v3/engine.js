@@ -9,6 +9,16 @@
 //     item is absent. That is N/A, not FAIL: whether the item must be there is the job of the
 //     "present" rule, so an absent disclaimer is reported once, not five times.
 //   - A position estimated by the model, not measured, is REVIEW rather than PASS or FAIL.
+//
+// Changes after re-checking the two real ads' recorded runs. Where a measurement cannot carry a
+// verdict on its own, the result is REVIEW (a person checks) instead of PASS or FAIL:
+//   - Durations allow a rule's tolerance: a 60.027 s file is a 60 s ad, not a FAIL.
+//   - Text height takes each caption's smallest line: a name caption's title line is smaller than
+//     the name. A super whose height could not be measured makes the check REVIEW, not PASS.
+//   - A super short of its hold time by less than one sampled frame is REVIEW: OCR timing cannot
+//     tell 2.75 s from 2.8 s.
+//   - Figures in the voice-over (money, percentages, large counts) that the model did not report
+//     as claims are listed for review, since the model only reports superlatives reliably.
 (function (root) {
   const LOW_CONFIDENCE = 0.6;
 
@@ -72,6 +82,9 @@
     return null;
   }
 
+  // Money, percentages and large counts in speech: "$47 million", "211,000", "30%". Years and dates do not match.
+  const FIGURE = /(\$|£|€)\s?\d|\d[\d,.]*\s*(%|per ?cent|million|billion|thousand)\b|\b\d{1,3}(,\d{3})+\b/i;
+
   function lowConfidence(found) {
     return found.some((d) => d.confidence < LOW_CONFIDENCE);
   }
@@ -125,6 +138,7 @@
       }
 
       case "supers_hold": {
+        // A shortfall smaller than one sampled frame is inside the timing error: a person checks it.
         // BCAP superimposed text guidance 8.2-8.3: 0.2s per word, plus 2s recognition for 9 words
         // or fewer, 3s for 10 or more. Signs such as "%" or "£" on their own are not words (8.5).
         // v2 checked only the longest-held item; v3 checks every super and reports the worst.
@@ -137,19 +151,25 @@
         });
         const worst = checked.reduce((a, b) => (b.short < a.short ? b : a));
         const failing = checked.filter((c) => c.short < 0);
+        const clear = failing.filter((c) => c.short < -ctx.timingStep);
         const detail = `"${worst.d.text}": ${fmt(worst.held)} on screen, ${worst.words} words`;
-        return out(failing.length ? "FAIL" : "PASS",
-          failing.length ? `${failing.length} of ${checked.length} too short. Worst ${detail}` : `All ${checked.length} long enough. Tightest ${detail}`,
-          `≥ ${fmt(worst.required)} for that one (${worst.words} × 0.2s + ${worst.words <= 9 ? 2 : 3}s recognition)`);
+        const expected = `≥ ${fmt(worst.required)} for that one (${worst.words} × 0.2s + ${worst.words <= 9 ? 2 : 3}s recognition)`;
+        if (!failing.length) return out("PASS", `All ${checked.length} long enough. Tightest ${detail}`, expected);
+        const close = failing.length - clear.length;
+        const closeNote = close ? `; ${close} short by less than one sampled frame (${fmt(ctx.timingStep)}): check by eye` : "";
+        return out(clear.length ? "FAIL" : "REVIEW", `${failing.length} of ${checked.length} too short${closeNote}. Worst ${detail}`, expected);
       }
 
       case "min_text_height": {
         // BCAP superimposed text guidance 5.2-5.5: x-height in TV lines at 1080. 30 lines preferred,
         // 26 lines minimum only when the text sits on a single-colour opaque block.
+        // Each caption counts by its smallest line: a name caption's title line is smaller than the name.
+        const linesOf = (d) => Math.min(d.x_height_lines, ...(d.x_height_samples || []));
         const measured = found.filter((d) => typeof d.x_height_lines === "number");
-        if (!measured.length) return out("NOT_EVALUATED", "Text height not measured", `≥ ${p.preferred} TV lines`);
-        const smallest = measured.reduce((a, b) => (b.x_height_lines < a.x_height_lines ? b : a));
-        const lines = smallest.x_height_lines;
+        const unmeasured = found.filter((d) => d.source === "on_screen" && typeof d.x_height_lines !== "number");
+        if (!measured.length) return out(unmeasured.length ? "REVIEW" : "NOT_EVALUATED", `Text height not measured${unmeasured.length ? ` for ${unmeasured.length} item(s): check by eye` : ""}`, `≥ ${p.preferred} TV lines`);
+        const smallest = measured.reduce((a, b) => (linesOf(b) < linesOf(a) ? b : a));
+        const lines = linesOf(smallest);
         const expected = `≥ ${p.preferred} lines preferred, ${p.minimum} minimum on an opaque block`;
         let result = lines >= p.preferred ? "PASS" : lines >= p.minimum ? "REVIEW" : "FAIL";
         let note = result === "REVIEW" ? " (allowed only on a single-colour opaque block: check by eye)" : "";
@@ -161,6 +181,10 @@
           result = "REVIEW";
           note = ` measured on text over footage${spread ? `, lines disagree (${samples.join(", ")})` : ""}: check by eye`;
         }
+        if (unmeasured.length) {
+          if (result === "PASS") result = "REVIEW";
+          note += `; ${unmeasured.length} item(s) not measured, e.g. "${unmeasured[0].text}": check by eye`;
+        }
         return out(result, `"${smallest.text}": ${lines} TV lines x-height${note}`, expected);
       }
 
@@ -170,9 +194,18 @@
         return out(hit ? "PASS" : "FAIL", found.map(span).join(", "), `overlapping ${fmt(from)}–${fmt(ctx.duration)}`);
       }
 
-      case "claims_review":
-        if (!found.length) return out("PASS", "No claims detected", "Claims need substantiation");
-        return out("REVIEW", found.map((d) => `"${d.text}" (${d.source.replace("_", " ")}, ${span(d)})`).join("; "), "Evidence on file, approved by a person");
+      case "claims_review": {
+        // The model reports superlatives reliably but not figures, so figures in the voice-over that
+        // no claim covers are listed for a person as well.
+        const covered = (seg) => found.some((d) => d.source === "spoken" && d.start < seg.end && d.end > seg.start && FIGURE.test(d.text));
+        const figures = ctx.transcript.filter((seg) => FIGURE.test(seg.text) && !covered(seg));
+        const listed = [
+          ...found.map((d) => `"${d.text}" (${d.source.replace("_", " ")}, ${span(d)})`),
+          ...figures.map((seg) => `"${seg.text}" (figure in voice-over, ${span(seg)}, not classified by the model)`),
+        ];
+        if (!listed.length) return out("PASS", "No claims detected", "Claims need substantiation");
+        return out("REVIEW", listed.join("; "), "Evidence on file, approved by a person");
+      }
 
       default:
         return out("NOT_EVALUATED", "Unknown operator", rule.operator);
@@ -183,11 +216,15 @@
     const notApplicable = applicability(rule, ctx.declared);
     if (notApplicable) return { result: "N/A", detected: notApplicable, expected: rule.value };
     let actual = ctx.asset[rule.attribute];
+    // "in" with a tolerance: a measured duration of 60.027 s matches a 60 s slot.
+    const near = (v) => typeof actual === "number" && Math.abs(actual - Number(v)) <= rule.tolerance;
     if (rule.operator === "duration_offset_in") {
       actual = ctx.asset.duration != null && ctx.activeDuration != null ? Number((ctx.asset.duration - ctx.activeDuration).toFixed(3)) : null;
     }
     if (actual === null || actual === undefined) return { result: "NOT_EVALUATED", detected: null, expected: rule.value };
-    const passed = rule.operator === "duration_offset_in" ? Array.isArray(rule.value) && rule.value.includes(Math.round(actual)) : compare(actual, rule.operator, rule.value);
+    const passed = rule.operator === "duration_offset_in" ? Array.isArray(rule.value) && rule.value.includes(Math.round(actual))
+      : rule.operator === "in" && rule.tolerance ? Array.isArray(rule.value) && rule.value.some(near)
+      : compare(actual, rule.operator, rule.value);
     return { result: passed ? "PASS" : "FAIL", detected: actual, expected: rule.value };
   }
 
@@ -216,6 +253,9 @@
       activeDuration,
       declared,
       detections,
+      transcript: analysis?.content?.transcript || [],
+      // Text timing comes from frames sampled at sample_fps: differences below one step are not measured.
+      timingStep: 1 / (analysis?.content?.sample_fps || 4),
       duration: merged.duration,
       contentError: !analysis || analysis.content?.error,
     };

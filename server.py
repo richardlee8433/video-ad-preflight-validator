@@ -347,8 +347,9 @@ Report every item of these types:
   people, and small logos in a corner of an end card. Look at the first and last frames carefully:
   that is where logo cards usually are.
 - "claim": ONLY a comparative, superlative, absolute, health or performance claim that would
-  need evidence (e.g. "best", "No.1", "guaranteed", "proven", "healthiest", "first of its kind").
-  Descriptive lines, slogans and heritage statements ("brewed since 1921") are NOT claims.
+  need evidence (e.g. "best", "No.1", "guaranteed", "proven", "healthiest", "first of its kind"),
+  and any statistic or figure stated as fact ("$47 million in support", "helped 211,000 families",
+  "30% fewer"). Descriptive lines, slogans and heritage statements ("brewed since 1921") are NOT claims.
 - "slate": a technical clock or slate card that is not part of the ad itself
 - "super": text superimposed on the picture by the editor: subtitles, name and title captions
   (lower thirds), taglines, calls to action, web addresses, end-card lines. Every person's name
@@ -617,10 +618,10 @@ def detect_content_v3(path):
             if not sizes:  # e.g. read mid-fade: try the middle of the interval instead
                 sizes = sorted(v for v in (measure_x_height(path, item, b) for b in item["line_boxes"]) if v)
             if sizes:
-                # Lines of one caption share a font size, so disagreement between them means the
-                # measurement was thrown off (text straight on footage, no opaque block): the engine
-                # turns that into a person's check instead of a pass or fail.
-                item["x_height_lines"] = sizes[len(sizes) // 2]
+                # The smallest line decides: a name caption's title line is smaller than the name.
+                # Lines that disagree can also mean the measurement was thrown off (text straight on
+                # footage, no opaque block): the engine turns a low reading there into a person's check.
+                item["x_height_lines"] = sizes[0]
                 item["x_height_samples"] = sizes
     return {"model": MODEL, "transcribe_model": TRANSCRIBE_MODEL, "sample_fps": SAMPLE_FPS, "pipeline": PIPELINE_V3,
             "frames": len(frames), "transcript": segments, "seconds": round(time.time() - started, 1),
