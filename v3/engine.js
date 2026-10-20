@@ -12,7 +12,8 @@
 //
 // Changes after re-checking the two real ads' recorded runs. Where a measurement cannot carry a
 // verdict on its own, the result is REVIEW (a person checks) instead of PASS or FAIL:
-//   - Durations allow a rule's tolerance: a 60.027 s file is a 60 s ad, not a FAIL.
+//   - A duration within a rule's tolerance of an allowed length is REVIEW, not FAIL: 60.027 s may be
+//     container rounding or a genuinely long creative, and the spec states no tolerance.
 //   - Text height takes each caption's smallest line: a name caption's title line is smaller than
 //     the name. A super whose height could not be measured makes the check REVIEW, not PASS.
 //   - A super short of its hold time by less than one sampled frame is REVIEW: OCR timing cannot
@@ -83,7 +84,8 @@
   }
 
   // Money, percentages and large counts in speech: "$47 million", "211,000", "30%". Years and dates do not match.
-  const FIGURE = /(\$|£|€)\s?\d|\d[\d,.]*\s*(%|per ?cent|million|billion|thousand)\b|\b\d{1,3}(,\d{3})+\b/i;
+  const FIGURE = /(\$|£|€)\s?\d[\d,.]*|\d[\d,.]*\s*(%|per ?cent|million|billion|thousand)\b|\b\d{1,3}(,\d{3})+\b/gi;
+  const figuresIn = (text) => (text.match(FIGURE) || []).map((f) => f.replace(/\s+/g, " ").toLowerCase());
 
   function lowConfidence(found) {
     return found.some((d) => d.confidence < LOW_CONFIDENCE);
@@ -197,8 +199,9 @@
       case "claims_review": {
         // The model reports superlatives reliably but not figures, so figures in the voice-over that
         // no claim covers are listed for a person as well.
-        const covered = (seg) => found.some((d) => d.source === "spoken" && d.start < seg.end && d.end > seg.start && FIGURE.test(d.text));
-        const figures = ctx.transcript.filter((seg) => FIGURE.test(seg.text) && !covered(seg));
+        // Each figure counts on its own: a claim covering "$47 million" does not cover "211,000" in the same segment.
+        const claimed = found.filter((d) => d.source === "spoken").flatMap((d) => figuresIn(d.text));
+        const figures = ctx.transcript.filter((seg) => figuresIn(seg.text).some((f) => !claimed.includes(f)));
         const listed = [
           ...found.map((d) => `"${d.text}" (${d.source.replace("_", " ")}, ${span(d)})`),
           ...figures.map((seg) => `"${seg.text}" (figure in voice-over, ${span(seg)}, not classified by the model)`),
@@ -216,15 +219,16 @@
     const notApplicable = applicability(rule, ctx.declared);
     if (notApplicable) return { result: "N/A", detected: notApplicable, expected: rule.value };
     let actual = ctx.asset[rule.attribute];
-    // "in" with a tolerance: a measured duration of 60.027 s matches a 60 s slot.
+    // "in" with a tolerance: 60.027 s is close to a 60 s slot but not on it, so a person checks it.
     const near = (v) => typeof actual === "number" && Math.abs(actual - Number(v)) <= rule.tolerance;
     if (rule.operator === "duration_offset_in") {
       actual = ctx.asset.duration != null && ctx.activeDuration != null ? Number((ctx.asset.duration - ctx.activeDuration).toFixed(3)) : null;
     }
     if (actual === null || actual === undefined) return { result: "NOT_EVALUATED", detected: null, expected: rule.value };
-    const passed = rule.operator === "duration_offset_in" ? Array.isArray(rule.value) && rule.value.includes(Math.round(actual))
-      : rule.operator === "in" && rule.tolerance ? Array.isArray(rule.value) && rule.value.some(near)
-      : compare(actual, rule.operator, rule.value);
+    if (rule.operator === "in" && rule.tolerance && !compare(actual, "in", rule.value) && Array.isArray(rule.value) && rule.value.some(near)) {
+      return { result: "REVIEW", detected: `${actual} (within ${rule.tolerance} of an allowed value, not exact: check the delivered length)`, expected: rule.value };
+    }
+    const passed = rule.operator === "duration_offset_in" ? Array.isArray(rule.value) && rule.value.includes(Math.round(actual)) : compare(actual, rule.operator, rule.value);
     return { result: passed ? "PASS" : "FAIL", detected: actual, expected: rule.value };
   }
 
